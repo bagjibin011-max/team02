@@ -136,8 +136,18 @@ dialog h2 { font-size: 1.3rem; margin-bottom: 16px; }
   gap: 12px;
 }
 .count { font-weight: 700; padding-top: 6px; }
-.code-box { text-align: center; }
-.code-box .label { font-size: 0.8rem; color: var(--ink-soft); margin: 0 0 6px; }
+.room-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  max-width: min(320px, 45vw);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 초대 코드: 방 이름 아래, 코드는 가운데 / 복사 버튼은 코드 오른쪽 */
 .code-tiles { display: flex; gap: 6px; justify-content: center; }
 .code-tiles span {
   width: 34px;
@@ -150,8 +160,21 @@ dialog h2 { font-size: 1.3rem; margin-bottom: 16px; }
   font-weight: 800;
   border-radius: 8px;
 }
+.code-box {
+  text-align: center;
+  margin: 50px 0 60px;
+}
+.code-line {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
 .copy-btn {
-  margin-top: 8px;
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
   padding: 6px 12px;
   font: inherit;
   font-size: 0.85rem;
@@ -160,8 +183,20 @@ dialog h2 { font-size: 1.3rem; margin-bottom: 16px; }
   background: var(--surface);
   cursor: pointer;
 }
+.code-box .label {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
 
-.room-title { text-align: center; margin: 40px 0 32px; font-size: 1.5rem; }
+@media (max-width: 480px) {
+  .copy-btn {
+    position: static;
+    transform: none;
+    display: block;
+    margin: 8px auto 0;
+  }
+}
 
 .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .menu a {

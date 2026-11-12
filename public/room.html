@@ -9,17 +9,19 @@
 </head>
 <body>
   <main class="room">
-    <header class="room-top">
+        <header class="room-top">
       <div class="count" id="count">👥 0명</div>
-      <div class="code-box">
-        <p class="label">초대 코드</p>
-        <div class="code-tiles" id="codeTiles" aria-label="초대 코드"></div>
-        <button id="copyBtn" class="copy-btn" type="button">코드 복사</button>
-      </div>
+      <h1 class="room-title" id="roomName"></h1>
       <div class="top-right"><a href="/index.html" class="home-link">첫 화면으로</a></div>
     </header>
 
-    <h1 class="room-title" id="roomName"></h1>
+    <div class="code-box">
+      <div class="code-line">
+        <div class="code-tiles" id="codeTiles" aria-label="초대 코드"></div>
+        <button id="copyBtn" class="copy-btn" type="button">코드 복사</button>
+      </div>
+      <p class="label">초대 코드</p>
+    </div>
 
     <nav class="menu">
       <a id="dateLink" href="#"><span class="icon">📅</span>날짜<small>가능한 날 고르기</small></a>
