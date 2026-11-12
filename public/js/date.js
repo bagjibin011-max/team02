@@ -1,15 +1,19 @@
 
-// Read the room code and current member information.
+// Get the room code and current member ID.
 const params = new URLSearchParams(window.location.search);
 
-const roomCode = (params.get("code") || "").trim().toUpperCase();
+const roomCode = (params.get("code") || "")
+  .trim()
+  .toUpperCase();
 
 const memberId =
   params.get("memberId") ||
-  (roomCode ? localStorage.getItem(`memberId:${roomCode}`) : null) ||
+  (roomCode
+    ? localStorage.getItem(`memberId:${roomCode}`)
+    : null) ||
   "";
 
-// Calendar HTML elements.
+// HTML elements.
 const calendarGrid = document.getElementById("calendar-grid");
 const monthTitle = document.getElementById("month-title");
 const selectedList = document.getElementById("selected-list");
@@ -18,14 +22,15 @@ const saveStatus = document.getElementById("save-status");
 const saveButton = document.getElementById("save-button");
 const voteDetails = document.getElementById("vote-details");
 
-// Calendar state.
+// Calendar information.
 const today = new Date();
 
 let currentYear = today.getFullYear();
 let currentMonth = today.getMonth();
+
 let focusedDate = null;
 
-// Member and server state.
+// Room and member information.
 let canVote = false;
 let saving = false;
 let memberCount = 0;
@@ -36,11 +41,16 @@ let participants = [];
 const selectedDates = new Set();
 const savedDates = new Set();
 
-// Calculated voting information.
+// Voting results shown on the calendar.
 let viewStats = new Map();
 let topDates = new Set();
 
-// Create a YYYY-MM-DD date string.
+
+// --------------------------------------------------
+// Date formatting
+// --------------------------------------------------
+
+// Create a YYYY-MM-DD string.
 function formatDate(year, month, day) {
   const mm = String(month + 1).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
@@ -48,9 +58,11 @@ function formatDate(year, month, day) {
   return `${year}-${mm}-${dd}`;
 }
 
-// Convert YYYY-MM-DD to a Korean date label.
+// Create a Korean date label.
 function formatKoreanDate(dateString) {
-  const [year, month, day] = dateString.split("-").map(Number);
+  const [year, month, day] = dateString
+    .split("-")
+    .map(Number);
 
   const date = new Date(year, month - 1, day);
 
@@ -62,27 +74,81 @@ function formatKoreanDate(dateString) {
   });
 }
 
-// Increase the yellow intensity as more members vote.
-// There is no fixed 4-person color limit.
+
+// --------------------------------------------------
+// Status message
+// --------------------------------------------------
+
+// Show a message and reset its color every time.
+function setSaveStatus(message, type = "normal") {
+  saveStatus.textContent = message;
+
+  saveStatus.classList.remove(
+    "status-warning",
+    "status-error"
+  );
+
+  if (type === "warning") {
+    saveStatus.classList.add("status-warning");
+  } else if (type === "error") {
+    saveStatus.classList.add("status-error");
+  }
+}
+
+// Show whether there are unsaved changes.
+function updateChangeStatus() {
+  if (!canVote) {
+    setSaveStatus(
+      "서버 저장에는 방 참여자 정보가 필요합니다."
+    );
+
+    return;
+  }
+
+  if (hasUnsavedChanges()) {
+    setSaveStatus(
+      "변경 사항이 있습니다. 저장 버튼을 눌러주세요.",
+      "warning"
+    );
+  } else {
+    setSaveStatus(
+      "저장된 날짜와 동일한 상태입니다."
+    );
+  }
+}
+
+
+// --------------------------------------------------
+// Vote colors
+// --------------------------------------------------
+
+// More votes create a stronger yellow background.
+// The calculation works for any number of members.
 function getVoteColor(count, total) {
   if (count === 0 || total <= 0) {
     return "#f6f8fb";
   }
 
   const ratio = Math.min(count / total, 1);
+
   const lightness = 96 - ratio * 35;
 
   return `hsl(43, 100%, ${lightness.toFixed(2)}%)`;
 }
 
-// Detect changes compared to the last server save.
+
+// --------------------------------------------------
+// Unsaved changes
+// --------------------------------------------------
+
+// Compare current selections with saved selections.
 function hasUnsavedChanges() {
   if (selectedDates.size !== savedDates.size) {
     return true;
   }
 
-  for (const date of selectedDates) {
-    if (!savedDates.has(date)) {
+  for (const dateString of selectedDates) {
+    if (!savedDates.has(dateString)) {
       return true;
     }
   }
@@ -90,52 +156,57 @@ function hasUnsavedChanges() {
   return false;
 }
 
-// Calculate vote counts and participant names.
-// Current selections are previewed before saving.
+
+// --------------------------------------------------
+// Calculate voting information
+// --------------------------------------------------
+
+// Count how many members selected each date.
 function calculateViewStats() {
-  const results = new Map();
+  const result = new Map();
 
   for (const participant of participants) {
+    // Preview the current member's unsaved selections.
     const dates =
       canVote && participant.memberId === memberId
         ? selectedDates
         : participant.availableDates || [];
 
-    // Prevent duplicate votes for the same date.
+    // Prevent duplicate votes.
     const uniqueDates = new Set(dates);
 
     for (const dateString of uniqueDates) {
-      if (!results.has(dateString)) {
-        results.set(dateString, {
+      if (!result.has(dateString)) {
+        result.set(dateString, {
           date: dateString,
           count: 0,
           names: []
         });
       }
 
-      const info = results.get(dateString);
+      const info = result.get(dateString);
 
       info.count += 1;
       info.names.push(participant.name);
     }
   }
 
-  viewStats = results;
+  viewStats = result;
 
-  // Find the maximum number of votes.
+  // Find the largest vote count.
   let maxCount = 0;
 
-  for (const info of results.values()) {
+  for (const info of result.values()) {
     if (info.count > maxCount) {
       maxCount = info.count;
     }
   }
 
-  // Multiple dates may share the highest vote count.
+  // All dates tied for first place receive a star.
   topDates = new Set();
 
   if (maxCount > 0) {
-    for (const info of results.values()) {
+    for (const info of result.values()) {
       if (info.count === maxCount) {
         topDates.add(info.date);
       }
@@ -143,15 +214,25 @@ function calculateViewStats() {
   }
 }
 
-// Refresh all date-related UI components.
+
+// --------------------------------------------------
+// Refresh the screen
+// --------------------------------------------------
+
 function renderAll() {
   calculateViewStats();
+
   renderCalendar();
   renderSelectedDates();
   renderVoteDetails();
 }
 
-// Apply the latest date summary from the server.
+
+// --------------------------------------------------
+// Apply server data
+// --------------------------------------------------
+
+// Restore the current member's saved selections.
 function applySummary(summary) {
   participants = Array.isArray(summary.participants)
     ? summary.participants
@@ -161,7 +242,6 @@ function applySummary(summary) {
     ? summary.memberCount
     : participants.length;
 
-  // Find the current member registered in this room.
   const me = participants.find(
     (person) => person.memberId === memberId
   );
@@ -176,7 +256,6 @@ function applySummary(summary) {
       ? me.availableDates
       : [];
 
-    // Restore the current member's saved dates.
     for (const dateString of dates) {
       selectedDates.add(dateString);
       savedDates.add(dateString);
@@ -188,7 +267,65 @@ function applySummary(summary) {
   renderAll();
 }
 
-// Display the selected dates with remove buttons.
+
+// --------------------------------------------------
+// Calendar click: select or view only
+// --------------------------------------------------
+
+// A calendar click never cancels an existing selection.
+function selectOrViewDate(dateString) {
+  if (saving) {
+    return;
+  }
+
+  focusedDate = dateString;
+
+  // Add the date only when it is not already selected.
+  if (!selectedDates.has(dateString)) {
+    if (selectedDates.size >= 90) {
+      setSaveStatus(
+        "날짜는 최대 90일까지 선택할 수 있습니다.",
+        "warning"
+      );
+
+      renderVoteDetails();
+      return;
+    }
+
+    selectedDates.add(dateString);
+  }
+
+  // Clicking an already selected date only shows details.
+  renderAll();
+  updateChangeStatus();
+}
+
+
+// --------------------------------------------------
+// X button: remove selected date
+// --------------------------------------------------
+
+// Only the X button removes an individual date.
+function removeSelectedDate(dateString) {
+  if (saving) {
+    return;
+  }
+
+  // Remove the date from the current selection.
+  selectedDates.delete(dateString);
+
+  // Keep displaying the date's voting information.
+  focusedDate = dateString;
+
+  renderAll();
+  updateChangeStatus();
+}
+
+
+// --------------------------------------------------
+// Selected date list
+// --------------------------------------------------
+
 function renderSelectedDates() {
   const dates = [...selectedDates].sort();
 
@@ -209,15 +346,19 @@ function renderSelectedDates() {
     const item = document.createElement("li");
     item.className = "selected-date-item";
 
+    // Date text.
     const dateLabel = document.createElement("span");
-    dateLabel.textContent = formatKoreanDate(dateString);
 
-    // Remove a previously selected date.
+    dateLabel.textContent =
+      formatKoreanDate(dateString);
+
+    // X button.
     const removeButton = document.createElement("button");
 
     removeButton.type = "button";
     removeButton.className = "remove-date";
     removeButton.textContent = "×";
+
     removeButton.disabled = saving;
 
     removeButton.setAttribute(
@@ -225,8 +366,9 @@ function renderSelectedDates() {
       `${formatKoreanDate(dateString)} 선택 취소`
     );
 
+    // Important: call the remove function, not the select function.
     removeButton.addEventListener("click", () => {
-      toggleDate(dateString);
+      removeSelectedDate(dateString);
     });
 
     item.appendChild(dateLabel);
@@ -236,7 +378,11 @@ function renderSelectedDates() {
   }
 }
 
-// Show information about the currently focused date.
+
+// --------------------------------------------------
+// Date voting details
+// --------------------------------------------------
+
 function renderVoteDetails() {
   voteDetails.innerHTML = "";
 
@@ -244,6 +390,7 @@ function renderVoteDetails() {
     const hint = document.createElement("p");
 
     hint.className = "detail-hint";
+
     hint.textContent =
       "날짜를 클릭하면 참여 인원과 이름을 확인할 수 있습니다.";
 
@@ -254,39 +401,46 @@ function renderVoteDetails() {
   const info = viewStats.get(focusedDate);
   const count = info ? info.count : 0;
 
+  // Selected date title.
   const heading = document.createElement("h3");
-  heading.textContent = formatKoreanDate(focusedDate);
 
+  heading.textContent =
+    formatKoreanDate(focusedDate);
+
+  // Number of participants.
   const countText = document.createElement("p");
 
   countText.className = "detail-count";
+
   countText.textContent =
     `총 ${memberCount}명 중 ${count}명 선택`;
 
   voteDetails.appendChild(heading);
   voteDetails.appendChild(countText);
 
-  // Explain that unsaved changes are previewed locally.
+  // Explain unsaved results.
   if (canVote && hasUnsavedChanges()) {
     const pending = document.createElement("p");
 
     pending.className = "detail-pending";
+
     pending.textContent =
-      "현재 결과는 미리보기입니다. 저장하면 다른 참여자에게 반영됩니다.";
+      "변경 사항이 있습니다. 저장 후 다른 참여자에게 반영됩니다.";
 
     voteDetails.appendChild(pending);
   }
 
-  // Mark the dates with the most votes.
+  // Popular date label.
   if (topDates.has(focusedDate)) {
-    const topLabel = document.createElement("p");
+    const popular = document.createElement("p");
 
-    topLabel.className = "top-message";
-    topLabel.textContent = "★ 현재 최다 선택 날짜";
+    popular.className = "top-message";
+    popular.textContent = "★ 현재 최다 선택 날짜";
 
-    voteDetails.appendChild(topLabel);
+    voteDetails.appendChild(popular);
   }
 
+  // No participants selected this date.
   if (count === 0) {
     const empty = document.createElement("p");
 
@@ -297,8 +451,9 @@ function renderVoteDetails() {
     return;
   }
 
-  // Display non-anonymous date voters.
+  // Participant name badges.
   const nameList = document.createElement("div");
+
   nameList.className = "voter-names";
 
   for (const name of info.names) {
@@ -313,73 +468,42 @@ function renderVoteDetails() {
   voteDetails.appendChild(nameList);
 }
 
-// Select or cancel a date.
-// Clicking the same date again removes the selection.
-function toggleDate(dateString, removeOnly = false) {
-  if (saving) {
-    return;
-  }
 
-  focusedDate = dateString;
+// --------------------------------------------------
+// Calendar rendering
+// --------------------------------------------------
 
-  if (removeOnly) {
-    // Remove only when the X button is clicked.
-    selectedDates.delete(dateString);
-  } else if (!selectedDates.has(dateString)) {
-    // Calendar click adds a new date.
-    if (selectedDates.size >= 90) {
-      saveStatus.textContent =
-        "날짜는 최대 90일까지 선택할 수 있습니다.";
-      return;
-    }
-
-    selectedDates.add(dateString);
-  }
-
-  // Clicking an already selected date only displays details.
-  renderAll();
-
-  if (!canVote) {
-    saveStatus.textContent =
-      "서버 저장에는 방 참여자 정보가 필요합니다.";
-  } else if (hasUnsavedChanges()) {
-    saveStatus.textContent =
-      "변경 사항이 있습니다. 저장 버튼을 눌러주세요.";
-      saveStatus.style.color = "var(--danger)";
-  } else {
-    saveStatus.textContent =
-      "저장된 날짜와 동일한 상태입니다.";
-  }
-}
-
-// Draw the current month's calendar.
 function renderCalendar() {
   calendarGrid.innerHTML = "";
 
   monthTitle.textContent =
     `${currentYear}년 ${currentMonth + 1}월`;
 
+  // First weekday of the month.
   const firstDay = new Date(
     currentYear,
     currentMonth,
     1
   ).getDay();
 
+  // Number of days in the month.
   const daysInMonth = new Date(
     currentYear,
     currentMonth + 1,
     0
   ).getDate();
 
+  // Fill the last calendar row.
   const totalCells =
     Math.ceil((firstDay + daysInMonth) / 7) * 7;
 
   for (let i = 0; i < totalCells; i++) {
     const dayNumber = i - firstDay + 1;
 
-    // Empty positions before or after the month.
+    // Empty positions.
     if (dayNumber < 1 || dayNumber > daysInMonth) {
       const empty = document.createElement("div");
+
       empty.className = "empty-day";
 
       calendarGrid.appendChild(empty);
@@ -395,24 +519,26 @@ function renderCalendar() {
     const info = viewStats.get(dateString);
     const count = info ? info.count : 0;
 
+    // Create a date button.
     const button = document.createElement("button");
 
     button.type = "button";
     button.className = "day";
     button.disabled = saving;
 
-    // Apply yellow color using the participant ratio.
+    // Yellow intensity depends on the number of votes.
     button.style.backgroundColor =
       getVoteColor(count, memberCount);
 
     // Date number.
     const number = document.createElement("span");
+
     number.className = "day-number";
     number.textContent = dayNumber;
 
     button.appendChild(number);
 
-    // Number of participants who selected this date.
+    // Vote count.
     if (count > 0) {
       const countLabel = document.createElement("span");
 
@@ -424,12 +550,12 @@ function renderCalendar() {
 
     const mySelected = selectedDates.has(dateString);
 
-    // Navy border for the member's selected dates.
+    // Navy border for the current member's selections.
     if (mySelected) {
       button.classList.add("my-selected");
     }
 
-    // Small dot for unsaved changes.
+    // Red dot when the saved and current states differ.
     if (
       canVote &&
       mySelected !== savedDates.has(dateString)
@@ -437,12 +563,12 @@ function renderCalendar() {
       button.classList.add("pending-date");
     }
 
-    // Star for the most popular dates.
+    // Star for the dates with the most votes.
     if (topDates.has(dateString)) {
       button.classList.add("top-date");
     }
 
-    // Today indicator.
+    // Today's date.
     if (
       currentYear === today.getFullYear() &&
       currentMonth === today.getMonth() &&
@@ -451,7 +577,7 @@ function renderCalendar() {
       button.classList.add("today");
     }
 
-    // Focused date indicator.
+    // Currently viewed date.
     if (focusedDate === dateString) {
       button.classList.add("focused-date");
     }
@@ -466,18 +592,24 @@ function renderCalendar() {
       `${dateString}, ${count}명 선택`
     );
 
+    // Important: a calendar click cannot remove a date.
     button.addEventListener("click", () => {
-      toggleDate(dateString);
+      selectOrViewDate(dateString);
     });
 
     calendarGrid.appendChild(button);
   }
 }
 
-// Previous month button.
-document.getElementById("prev-month").addEventListener(
-  "click",
-  () => {
+
+// --------------------------------------------------
+// Calendar navigation
+// --------------------------------------------------
+
+// Previous month.
+document
+  .getElementById("prev-month")
+  .addEventListener("click", () => {
     const date = new Date(
       currentYear,
       currentMonth - 1,
@@ -488,13 +620,12 @@ document.getElementById("prev-month").addEventListener(
     currentMonth = date.getMonth();
 
     renderCalendar();
-  }
-);
+  });
 
-// Next month button.
-document.getElementById("next-month").addEventListener(
-  "click",
-  () => {
+// Next month.
+document
+  .getElementById("next-month")
+  .addEventListener("click", () => {
     const date = new Date(
       currentYear,
       currentMonth + 1,
@@ -505,25 +636,26 @@ document.getElementById("next-month").addEventListener(
     currentMonth = date.getMonth();
 
     renderCalendar();
-  }
-);
+  });
 
-// Current month button.
-document.getElementById("today-button").addEventListener(
-  "click",
-  () => {
+// Return to current month.
+document
+  .getElementById("today-button")
+  .addEventListener("click", () => {
     currentYear = today.getFullYear();
     currentMonth = today.getMonth();
 
     renderCalendar();
-  }
-);
+  });
 
-// Clear all date selections immediately.
-// Saving is required to update the server.
-document.getElementById("reset-button").addEventListener(
-  "click",
-  () => {
+
+// --------------------------------------------------
+// Reset all selected dates
+// --------------------------------------------------
+
+document
+  .getElementById("reset-button")
+  .addEventListener("click", () => {
     if (saving) {
       return;
     }
@@ -532,20 +664,14 @@ document.getElementById("reset-button").addEventListener(
     focusedDate = null;
 
     renderAll();
+    updateChangeStatus();
+  });
 
-    if (!canVote) {
-      saveStatus.textContent = "모든 선택을 초기화했습니다.";
-    } else if (hasUnsavedChanges()) {
-      saveStatus.textContent =
-        "선택을 초기화했습니다. 저장 버튼을 눌러 확정해주세요.";
-    } else {
-      saveStatus.textContent =
-        "저장된 날짜와 동일한 상태입니다.";
-    }
-  }
-);
 
-// Read the Express server response.
+// --------------------------------------------------
+// Server response helper
+// --------------------------------------------------
+
 async function readResponse(response) {
   let data;
 
@@ -553,27 +679,33 @@ async function readResponse(response) {
     data = await response.json();
   } catch {
     throw new Error(
-      "서버 응답을 읽을 수 없습니다. API 연결을 확인해주세요."
+      "서버 응답을 읽을 수 없습니다."
     );
   }
 
   if (!response.ok) {
     throw new Error(
-      data.error || `서버 요청 실패 (${response.status})`
+      data.error ||
+      `서버 요청 실패 (${response.status})`
     );
   }
 
   return data;
 }
 
-// Load saved votes from the shared room store.
+
+// --------------------------------------------------
+// Load existing votes from the server
+// --------------------------------------------------
+
 async function loadRoomVotes() {
   if (!roomCode) {
     canVote = false;
     saveButton.disabled = true;
 
-    saveStatus.textContent =
-      "미리보기 모드입니다. 방에서 입장하면 서버 저장이 가능합니다.";
+    setSaveStatus(
+      "방 화면에서 입장하면 날짜를 저장할 수 있습니다."
+    );
 
     return;
   }
@@ -587,19 +719,31 @@ async function loadRoomVotes() {
 
     applySummary(summary);
 
-    saveStatus.textContent = canVote
-      ? "서버에서 저장된 날짜를 불러왔습니다."
-      : "참여자 정보를 찾을 수 없습니다. 방에서 다시 입장해주세요.";
+    if (canVote) {
+      setSaveStatus(
+        "서버에서 저장된 날짜를 불러왔습니다."
+      );
+    } else {
+      setSaveStatus(
+        "참여자 정보를 찾을 수 없습니다. 방에서 다시 입장해주세요."
+      );
+    }
   } catch (error) {
     canVote = false;
     saveButton.disabled = true;
 
-    saveStatus.textContent =
-      `서버 연결 실패: ${error.message}`;
+    setSaveStatus(
+      `서버 연결 실패: ${error.message}`,
+      "error"
+    );
   }
 }
 
-// Save the selected dates to the server.
+
+// --------------------------------------------------
+// Save selected dates to the server
+// --------------------------------------------------
+
 saveButton.addEventListener("click", async () => {
   if (!canVote || saving) {
     return;
@@ -607,7 +751,8 @@ saveButton.addEventListener("click", async () => {
 
   saving = true;
   saveButton.disabled = true;
-  saveStatus.textContent = "날짜를 저장하고 있습니다...";
+
+  setSaveStatus("날짜를 저장하고 있습니다...");
 
   renderAll();
 
@@ -628,14 +773,17 @@ saveButton.addEventListener("click", async () => {
 
     const result = await readResponse(response);
 
-    // Update the displayed vote counts after saving.
+    // Update saved selections and vote results.
     applySummary(result);
 
-    saveStatus.textContent =
-      "날짜 선택이 서버에 저장되었습니다.";
+    setSaveStatus(
+      "날짜 선택이 서버에 저장되었습니다."
+    );
   } catch (error) {
-    saveStatus.textContent =
-      `날짜 저장 실패: ${error.message}`;
+    setSaveStatus(
+      `날짜 저장 실패: ${error.message}`,
+      "error"
+    );
   } finally {
     saving = false;
     saveButton.disabled = !canVote;
@@ -644,24 +792,38 @@ saveButton.addEventListener("click", async () => {
   }
 });
 
-// Return to A's room page.
+
+// --------------------------------------------------
+// Back link
+// --------------------------------------------------
+
 const backLink = document.getElementById("back-link");
 
 backLink.href = roomCode
   ? `./room.html?code=${encodeURIComponent(roomCode)}`
   : "./index.html";
 
-// Information about temporary server storage.
-const previewNotice = document.querySelector(".preview-notice");
+
+// --------------------------------------------------
+// Information notice
+// --------------------------------------------------
+
+const previewNotice = document.querySelector(
+  ".preview-notice"
+);
 
 if (previewNotice) {
   previewNotice.textContent =
     "날짜 선택은 같은 방의 참여자들과 공유됩니다. " +
-    "저장 전 변경 사항은 미리보기이며, 저장 버튼을 눌러야 확정됩니다. " +
+    "변경한 날짜는 저장 버튼을 눌러야 확정됩니다. " +
     "현재 서버는 재시작하면 방과 투표 기록이 초기화됩니다.";
 }
 
-// Initialize the calendar and load saved voting data.
+
+// --------------------------------------------------
+// Initialize
+// --------------------------------------------------
+
 saveButton.disabled = true;
 
 renderAll();
