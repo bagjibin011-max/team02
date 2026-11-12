@@ -315,16 +315,18 @@ function renderVoteDetails() {
 
 // Select or cancel a date.
 // Clicking the same date again removes the selection.
-function toggleDate(dateString) {
+function toggleDate(dateString, removeOnly = false) {
   if (saving) {
     return;
   }
 
   focusedDate = dateString;
 
-  if (selectedDates.has(dateString)) {
+  if (removeOnly) {
+    // Remove only when the X button is clicked.
     selectedDates.delete(dateString);
-  } else {
+  } else if (!selectedDates.has(dateString)) {
+    // Calendar click adds a new date.
     if (selectedDates.size >= 90) {
       saveStatus.textContent =
         "날짜는 최대 90일까지 선택할 수 있습니다.";
@@ -334,14 +336,16 @@ function toggleDate(dateString) {
     selectedDates.add(dateString);
   }
 
+  // Clicking an already selected date only displays details.
   renderAll();
 
   if (!canVote) {
     saveStatus.textContent =
-      "날짜 선택은 가능합니다. 서버 저장에는 방 참여자 정보가 필요합니다.";
+      "서버 저장에는 방 참여자 정보가 필요합니다.";
   } else if (hasUnsavedChanges()) {
     saveStatus.textContent =
       "변경 사항이 있습니다. 저장 버튼을 눌러주세요.";
+      saveStatus.style.color = "var(--danger)";
   } else {
     saveStatus.textContent =
       "저장된 날짜와 동일한 상태입니다.";
