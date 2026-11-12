@@ -1,0 +1,187 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #f5f7fb;
+  color: #222;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 28px 20px;
+  text-align: center;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+main {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+section {
+  padding: 32px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+h2 {
+  margin: 0 0 24px;
+  font-size: 22px;
+}
+
+#origin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+label {
+  font-weight: bold;
+}
+
+select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+}
+
+button {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4f46e5;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #4338ca;
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 3px;
+}
+
+#origin-status,
+#vote-status {
+  margin: 16px 0 0;
+  color: #4f46e5;
+}
+
+@media (max-width: 480px) {
+  main {
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+
+  section {
+    padding: 24px 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}
+
+#vote-section {
+  margin-top: 24px;
+}
+
+#candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.candidate-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.candidate-card:hover {
+  background-color: #f5f3ff;
+}
+
+.candidate-card:has(input:checked) {
+  border-color: #4f46e5;
+  background-color: #eef2ff;
+}
+
+.candidate-card input {
+  margin-top: 4px;
+  accent-color: #4f46e5;
+}
+
+.candidate-card strong {
+  font-size: 18px;
+}
+
+.candidate-card p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+#vote-form > button {
+  width: 100%;
+}
+
+#origin-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#origin-query {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#origin-query:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 3px;
+}
+
+#origin-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#search-status {
+  margin: 20px 0;
+  color: #666;
+}
+
+button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
