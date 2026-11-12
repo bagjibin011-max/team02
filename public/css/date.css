@@ -1,6 +1,6 @@
 
-/* Date scheduler page */
-/* Uses Pretendard and shared variables from common.css */
+/* Date scheduler - team common theme */
+/* Pretendard and color variables come from common.css */
 
 button {
   font-family: inherit;
@@ -72,7 +72,7 @@ button {
   font-size: 16px;
 }
 
-/* Content cards */
+/* Main cards */
 .content-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
@@ -90,7 +90,7 @@ button {
   box-shadow: 0 8px 24px rgba(22, 33, 58, 0.04);
 }
 
-/* Reset button */
+/* Reset unsaved changes */
 .calendar-toolbar {
   display: flex;
   justify-content: flex-end;
@@ -110,7 +110,7 @@ button {
   font-weight: 700;
 }
 
-.reset-button:hover {
+.reset-button:hover:not(:disabled) {
   background: #fff4d5;
   border-color: var(--accent);
 }
@@ -126,7 +126,6 @@ button {
 
 .calendar-header h2 {
   min-width: 165px;
-
   color: var(--ink);
   text-align: center;
   font-size: 23px;
@@ -153,7 +152,7 @@ button {
   border-color: var(--accent);
 }
 
-/* Calendar layout */
+/* Calendar grid */
 .weekdays,
 .calendar-grid {
   display: grid;
@@ -163,7 +162,6 @@ button {
 
 .weekdays {
   margin-bottom: 14px;
-
   color: var(--ink-soft);
   text-align: center;
   font-size: 13px;
@@ -177,7 +175,7 @@ button {
   color: #3c5b9e;
 }
 
-/* Date cells */
+/* Date cell */
 .day {
   position: relative;
 
@@ -195,18 +193,14 @@ button {
   background: #f6f8fb;
   color: var(--ink);
 
-  border: none;
+  border: 0;
   border-radius: var(--radius);
 
   transition: filter 0.15s ease;
 }
 
-.day:hover {
+.day:hover:not(:disabled) {
   filter: brightness(0.95);
-}
-
-.day:disabled {
-  cursor: wait;
 }
 
 .day-number {
@@ -220,12 +214,12 @@ button {
   font-weight: 700;
 }
 
-/* Navy border for selected dates */
+/* A navy border indicates my current selection. */
 .day.my-selected {
   box-shadow: inset 0 0 0 3px var(--ink);
 }
 
-/* Star for dates with the highest vote count */
+/* Popular saved dates have a star. */
 .day.top-date::after {
   content: "★";
 
@@ -238,7 +232,7 @@ button {
   line-height: 1;
 }
 
-/* Red dot for dates with unsaved changes */
+/* Unsaved changes have a small red dot. */
 .day.pending-date::before {
   content: "";
 
@@ -259,7 +253,7 @@ button {
   outline-offset: -3px;
 }
 
-/* Currently viewed date */
+/* Currently focused date */
 .day.focused-date {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -290,19 +284,19 @@ button {
 
 .legend-my {
   display: inline-block;
+  flex-shrink: 0;
 
   width: 14px;
   height: 14px;
 
+  background: #fff6dc;
   border: 2px solid var(--ink);
   border-radius: 3px;
-  background: #fff6dc;
-
-  flex-shrink: 0;
 }
 
 .legend-popular {
   display: inline-block;
+  flex-shrink: 0;
 
   width: 14px;
   height: 14px;
@@ -314,7 +308,6 @@ button {
   );
 
   border-radius: 3px;
-  flex-shrink: 0;
 }
 
 .legend-star {
@@ -323,17 +316,17 @@ button {
   font-weight: 900;
 }
 
-/* Always visible on both desktop and mobile */
+/* Red dot in the legend */
 .legend-pending {
   display: inline-block;
+  flex-shrink: 0;
 
   width: 9px;
   height: 9px;
   min-width: 9px;
 
-  background-color: var(--danger);
+  background: var(--danger);
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
 #today-button {
@@ -363,17 +356,27 @@ button {
 
 .selection-description {
   margin-top: 12px;
-
   color: var(--ink-soft);
   font-size: 13px;
   line-height: 1.7;
 }
 
-.selection-count {
-  margin: 26px 0 14px;
+/* Selected count and clear-saved button */
+.selection-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 
+  margin: 26px 0 14px;
+}
+
+.selection-count {
+  margin: 0;
   color: var(--ink);
   font-size: 15px;
+  white-space: nowrap;
 }
 
 .selection-count strong {
@@ -381,10 +384,34 @@ button {
   font-size: 23px;
 }
 
-/* Scrollable selected date list */
+/* Separate button for deleting saved selections */
+.clear-saved-button {
+  padding: 8px 10px;
+
+  background: #fff5f4;
+  color: var(--danger);
+
+  border: 1.5px solid #e8b4af;
+  border-radius: 9px;
+
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.clear-saved-button:hover:not(:disabled) {
+  background: #ffe5e2;
+  border-color: var(--danger);
+}
+
+.clear-saved-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Selected date list */
 .selected-list {
   list-style: none;
-
   padding: 0;
   margin: 0 0 20px;
 
@@ -393,7 +420,6 @@ button {
   overflow-y: auto;
 }
 
-/* One selected date */
 .selected-date-item {
   display: flex;
   align-items: center;
@@ -415,7 +441,7 @@ button {
   flex: 1;
 }
 
-/* X button for removing a selected date */
+/* X removes an individual date. */
 .remove-date {
   display: flex;
   align-items: center;
@@ -425,17 +451,17 @@ button {
   width: 30px;
   height: 30px;
 
-  border: none;
-  border-radius: 8px;
-
   background: white;
   color: var(--ink-soft);
+
+  border: 0;
+  border-radius: 8px;
 
   font-size: 22px;
   line-height: 1;
 }
 
-.remove-date:hover {
+.remove-date:hover:not(:disabled) {
   background: #ffe8e7;
   color: var(--danger);
 }
@@ -465,23 +491,26 @@ button {
   background: var(--accent);
   color: var(--accent-ink);
 
-  border: none;
+  border: 0;
   border-radius: var(--radius);
 
   font-size: 15px;
   font-weight: 800;
 }
 
-.save-button:hover {
+.save-button:hover:not(:disabled) {
   filter: brightness(0.96);
 }
 
-.save-button:disabled {
-  opacity: 0.5;
+/* Disabled controls */
+.save-button:disabled,
+.reset-button:disabled,
+.day:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Save feedback */
+/* Status feedback */
 .save-status {
   min-height: 24px;
   margin: 14px 0 0;
@@ -491,21 +520,15 @@ button {
 
   font-size: 13px;
   line-height: 1.6;
-
   overflow-wrap: anywhere;
 }
 
-/* Red only for unsaved changes */
-.save-status.status-warning {
-  color: var(--danger);
-}
-
-/* Red for server errors */
+.save-status.status-warning,
 .save-status.status-error {
   color: var(--danger);
 }
 
-/* Date voting details */
+/* Selected date details */
 .vote-details {
   margin-top: 24px;
   padding: 20px;
@@ -538,15 +561,12 @@ button {
   line-height: 1.7;
 }
 
-/* Unsaved changes notice */
 .detail-pending {
   margin: 8px 0;
-
   color: var(--danger);
   font-size: 12px;
 }
 
-/* Most popular date */
 .top-message {
   display: inline-block;
   padding: 5px 9px;
@@ -560,12 +580,10 @@ button {
   font-weight: 800;
 }
 
-/* Participant names */
 .voter-names {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-
   margin-top: 14px;
 }
 
@@ -585,7 +603,7 @@ button {
   font-weight: 600;
 }
 
-/* Storage notice */
+/* Footer notice */
 .preview-notice {
   margin-top: 24px;
 
@@ -642,7 +660,7 @@ button {
   }
 }
 
-/* Small phone layout */
+/* Small mobile layout */
 @media (max-width: 420px) {
   .calendar-card {
     padding: 12px;
@@ -671,5 +689,9 @@ button {
 
   .day.my-selected {
     box-shadow: inset 0 0 0 2px var(--ink);
+  }
+
+  .selection-count-row {
+    align-items: flex-start;
   }
 }
