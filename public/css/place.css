@@ -99,3 +99,54 @@ select:focus-visible {
     font-size: 20px;
   }
 }
+
+#vote-section {
+  margin-top: 24px;
+}
+
+#candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.candidate-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.candidate-card:hover {
+  background-color: #f5f3ff;
+}
+
+.candidate-card:has(input:checked) {
+  border-color: #4f46e5;
+  background-color: #eef2ff;
+}
+
+.candidate-card input {
+  margin-top: 4px;
+  accent-color: #4f46e5;
+}
+
+.candidate-card strong {
+  font-size: 18px;
+}
+
+.candidate-card p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+#vote-form > button {
+  width: 100%;
+}
