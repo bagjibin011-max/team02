@@ -4,28 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>날짜 조율 | 우리 언제 만나?</title>
 
-  <!-- Team common styles and Pretendard font -->
+  <!-- Shared theme and Pretendard font -->
   <link rel="stylesheet" href="./css/common.css">
   <link rel="stylesheet" href="./css/date.css">
 
-  <!-- Date coordination script -->
   <script src="./js/date.js" defer></script>
 </head>
 <body>
 
-  <!-- Header -->
   <header class="site-header">
     <div class="header-inner">
       <span class="logo">우리 언제 만나?</span>
-
-      <a
-        id="back-link"
-        class="back-link"
-        href="./room.html"
-      >
+      <a id="back-link" class="back-link" href="./room.html">
         방으로 돌아가기
       </a>
     </div>
@@ -33,12 +25,9 @@
 
   <main class="container">
 
-    <!-- Page heading -->
     <section class="page-heading">
       <span class="eyebrow">DATE SCHEDULER</span>
-
       <h1>우리 언제 만날까?</h1>
-
       <p>만날 수 있는 날짜를 모두 선택해 주세요.</p>
     </section>
 
@@ -52,12 +41,12 @@
             id="reset-button"
             class="reset-button"
             type="button"
+            title="마지막 저장 이후의 변경 사항만 취소합니다."
           >
             ↺ 선택 초기화
           </button>
         </div>
 
-        <!-- Month navigation -->
         <div class="calendar-header">
           <button
             id="prev-month"
@@ -80,7 +69,6 @@
           </button>
         </div>
 
-        <!-- Weekdays -->
         <div class="weekdays">
           <span>일</span>
           <span>월</span>
@@ -91,13 +79,8 @@
           <span>토</span>
         </div>
 
-        <!-- Calendar cells created by JavaScript -->
-        <div
-          id="calendar-grid"
-          class="calendar-grid"
-        ></div>
+        <div id="calendar-grid" class="calendar-grid"></div>
 
-        <!-- Calendar legend -->
         <div class="calendar-footer">
 
           <div class="legend-item">
@@ -120,16 +103,12 @@
             <span>변경 사항</span>
           </div>
 
-          <button
-            id="today-button"
-            type="button"
-          >
+          <button id="today-button" type="button">
             이번 달
           </button>
 
         </div>
 
-        <!-- Date details -->
         <section
           id="vote-details"
           class="vote-details"
@@ -148,18 +127,29 @@
         <h2>선택한 날짜</h2>
 
         <p class="selection-description">
-          날짜를 클릭하면 참여자 정보를 확인할 수 있으며,
-          × 버튼을 누르면 선택을 취소할 수 있습니다.
+          날짜를 클릭하면 선택하거나 참여자 정보를 확인할 수 있습니다.
+          선택 취소는 오른쪽 × 버튼을 이용해 주세요.
         </p>
 
-        <p class="selection-count">
-          총 <strong id="selected-count">0</strong>일 선택
-        </p>
+        <!-- Count and saved-date reset button -->
+        <div class="selection-count-row">
 
-        <ul
-          id="selected-list"
-          class="selected-list"
-        ></ul>
+          <p class="selection-count">
+            총 <strong id="selected-count">0</strong>일 선택
+          </p>
+
+          <button
+            id="clear-saved-button"
+            class="clear-saved-button"
+            type="button"
+            title="서버에 저장한 내 날짜를 모두 초기화합니다."
+          >
+            저장한 날짜 초기화
+          </button>
+
+        </div>
+
+        <ul id="selected-list" class="selected-list"></ul>
 
         <button
           id="save-button"
@@ -173,6 +163,7 @@
           id="save-status"
           class="save-status"
           role="status"
+          aria-live="polite"
         ></p>
 
       </aside>
@@ -180,8 +171,8 @@
     </div>
 
     <p class="preview-notice">
-      날짜 선택은 같은 방의 참여자들과 공유됩니다.
-      변경한 날짜는 저장 버튼을 눌러야 반영됩니다.
+      참여 인원과 노란색 배경은 저장된 결과를 기준으로 표시됩니다.
+      새로 선택한 날짜는 저장하기 전까지 테두리로만 표시됩니다.
     </p>
 
   </main>
