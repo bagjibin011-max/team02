@@ -242,3 +242,70 @@ if (roomCode) {
     `/room.html?code=${encodeURIComponent(roomCode)}`;
   backToRoom.hidden = false;
 }
+
+async function loadSavedOrigin() {
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) {
+    window.location.replace("/index.html");
+    return;
+  }
+
+  // 불러오는 동안 검색·저장 입력 잠금
+  const controls = [
+    ...originSearchForm.querySelectorAll("input, button"),
+    ...originForm.querySelectorAll("input, button")
+  ];
+
+  const previousDisabled = controls.map(
+    (control) => control.disabled
+  );
+
+  controls.forEach((control) => {
+    control.disabled = true;
+  });
+
+  originStatus.textContent = "저장된 출발지를 불러오는 중입니다.";
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/origin` +
+      `?memberId=${encodeURIComponent(memberId)}`
+    );
+
+    if (!result.originId) {
+      originStatus.textContent =
+        "아직 저장한 출발지가 없습니다. 출발지를 검색해주세요.";
+      return;
+    }
+
+    const origin = sampleOrigins.find(
+      (item) => item.id === result.originId
+    );
+
+    if (!origin) {
+      originStatus.textContent =
+        "저장된 출발지가 현재 목록에 없습니다. 다시 선택해주세요.";
+      return;
+    }
+
+    state.originId = origin.id;
+    originQuery.value = origin.name;
+
+    originStatus.textContent =
+      `저장된 출발지: ${origin.name} · ` +
+      `출발지 입력: ${result.savedCount}/${result.memberCount}명`;
+
+    renderCandidates();
+    voteSection.hidden = false;
+  } catch (error) {
+    originStatus.textContent = error.message;
+  } finally {
+    controls.forEach((control, index) => {
+      control.disabled = previousDisabled[index];
+    });
+  }
+}
+
+loadSavedOrigin();
