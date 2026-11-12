@@ -12,24 +12,7 @@ const state = {
   closed: false
 };
 
-// 화면 동작 확인용 예시 데이터
-const candidates = [
-  {
-    id: "sample-a",
-    name: "예시 장소 A",
-    features: "식사 중심 모임을 위한 예시 후보"
-  },
-  {
-    id: "sample-b",
-    name: "예시 장소 B",
-    features: "카페 중심 모임을 위한 예시 후보"
-  },
-  {
-    id: "sample-c",
-    name: "예시 장소 C",
-    features: "산책 중심 모임을 위한 예시 후보"
-  }
-];
+let candidates = [];
 
 function renderCandidates() {
   candidateList.replaceChildren();
@@ -522,6 +505,47 @@ refreshVotes.addEventListener("click", loadVoteCounts);
 
 // 저장된 입력을 복원한 뒤 마감 상태 확인
 async function initializePlace() {
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) {
+    window.location.replace("/index.html");
+    return;
+  }
+
+  // 후보를 받기 전에는 출발지 입력 잠금
+  const controls = [
+    ...originSearchForm.querySelectorAll("input, button"),
+    ...originForm.querySelectorAll("input, button")
+  ];
+
+  const previousDisabled = controls.map(
+    (control) => control.disabled
+  );
+
+  controls.forEach((control) => {
+    control.disabled = true;
+  });
+
+  placeStatus.textContent = "장소 후보를 불러오는 중입니다.";
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/candidates` +
+      `?memberId=${encodeURIComponent(memberId)}`
+    );
+
+    candidates = result.candidates;
+  } catch (error) {
+    placeStatus.textContent =
+      `후보 조회 실패: ${error.message} · 새로고침해 주세요.`;
+    return;
+  }
+
+  controls.forEach((control, index) => {
+    control.disabled = previousDisabled[index];
+  });
+
   await loadSavedOrigin();
   await loadVoteCounts();
 
