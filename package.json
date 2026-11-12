@@ -1,0 +1,24 @@
+{
+  "name": "team02",
+  "version": "1.0.0",
+  "description": "약속 조율 플랫폼 팀 프로젝트",
+  "main": "index.js",
+  "scripts": {
+  "start": "node server/app.js"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bagjibin011-max/team02.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bagjibin011-max/team02/issues"
+  },
+  "homepage": "https://github.com/bagjibin011-max/team02#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}

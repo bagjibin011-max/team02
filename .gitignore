@@ -1,0 +1,4 @@
+node_modules/
+.env
+server/data/runtime/*
+!server/data/runtime/.gitkeep
