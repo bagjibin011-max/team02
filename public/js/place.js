@@ -372,3 +372,60 @@ async function loadSavedOrigin() {
 }
 
 loadSavedOrigin();
+
+const refreshVotes = document.querySelector("#refresh-votes");
+const voteSummary = document.querySelector("#vote-summary");
+const voteCounts = document.querySelector("#vote-counts");
+
+let isLoadingVotes = false;
+
+async function loadVoteCounts() {
+  // 투표 화면이 숨겨져 있거나 이미 조회 중이면 건너뜀
+  if (voteSection.hidden || isLoadingVotes) return;
+
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) return;
+
+  isLoadingVotes = true;
+  refreshVotes.disabled = true;
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/votes` +
+      `?memberId=${encodeURIComponent(memberId)}`
+    );
+
+    // 요청 중 출발지 수정 화면으로 돌아갔다면 표시하지 않음
+    if (voteSection.hidden) return;
+
+    voteCounts.replaceChildren();
+
+    candidates.forEach((candidate) => {
+      const li = document.createElement("li");
+      li.textContent =
+        `${candidate.name}: ${result.counts[candidate.id] ?? 0}표`;
+
+      voteCounts.append(li);
+    });
+
+    voteSummary.textContent =
+      `투표 참여: ${result.voteCount}/${result.memberCount}명` +
+      " · 4초마다 자동 갱신";
+  } catch (error) {
+    voteSummary.textContent =
+      `현황 갱신 실패: ${error.message} (표시는 이전 조회 결과)`;
+  } finally {
+    isLoadingVotes = false;
+    refreshVotes.disabled = false;
+  }
+}
+
+refreshVotes.addEventListener("click", loadVoteCounts);
+
+setInterval(() => {
+  if (!document.hidden) {
+    loadVoteCounts();
+  }
+}, 4000);

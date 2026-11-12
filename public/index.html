@@ -41,17 +41,29 @@
   </main>
 
   <dialog id="createDialog">
-    <h2>새 방 만들기</h2>
-    <div class="field">
-      <label for="roomNameInput">방 이름</label>
-      <input id="roomNameInput" type="text" maxlength="30" placeholder="예: 11월 동아리 회식">
-    </div>
-    <p id="dialogError" class="error" role="alert"></p>
-    <div class="dialog-actions">
-      <button id="cancelBtn" class="btn btn-ghost" type="button">취소</button>
-      <button id="confirmBtn" class="btn" type="button">방 만들기</button>
-    </div>
-  </dialog>
+  <h2>새 방 만들기</h2>
+
+  <div class="field">
+    <label for="roomNameInput">방 이름</label>
+    <input
+      id="roomNameInput"
+      type="text"
+      maxlength="30"
+      placeholder="예: 11월 동아리 회식"
+    >
+  </div>
+
+  <p id="dialogError" class="error" role="alert"></p>
+
+  <div class="dialog-actions">
+    <button id="cancelBtn" class="btn btn-ghost" type="button">
+      취소
+    </button>
+    <button id="confirmBtn" class="btn" type="button">
+      방 만들기
+    </button>
+  </div>
+</dialog>
 
   <script src="/js/common.js"></script>
   <script src="/js/index.js"></script>

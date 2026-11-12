@@ -25,13 +25,17 @@
   function render(room) {
     document.title = `${room.roomName} · 약속 조율`;
     document.getElementById('roomName').textContent = room.roomName;
-    document.getElementById('count').textContent = `👥 ${room.memberCount}명`;
+    document.getElementById('count').textContent =
+      `👥 ${room.memberCount}명`;
 
     const list = document.getElementById('memberList');
     list.innerHTML = '';
     room.members.forEach((m) => {
       const li = document.createElement('li');
-      li.textContent = m.memberId === myId ? `${m.name} (나)` : m.name;
+      const meLabel = m.memberId === myId ? ' (나)' : '';
+      const hostLabel = m.memberId === room.hostMemberId ? ' 👑' : '';
+
+      li.textContent = `${m.name}${meLabel}${hostLabel}`;
       if (m.memberId === myId) li.className = 'me';
       list.appendChild(li);
     });

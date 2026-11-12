@@ -6,17 +6,35 @@ const store = require('../store');
 
 // 방 만들기
 router.post('/', (req, res) => {
-  const roomName = String(req.body.roomName || '').trim();
+  const body = req.body || {};
 
-  if (!roomName) {
-    return res.status(400).json({ error: '방 이름을 입력해주세요.' });
-  }
-  if (roomName.length > 30) {
-    return res.status(400).json({ error: '방 이름은 30자 이내로 입력해주세요.' });
+  const roomName = String(body.roomName || '').trim();
+  const name = String(body.name || '').trim();
+
+  if (!roomName || roomName.length > 30) {
+    return res.status(400).json({
+      error: '방 이름은 1~30자로 입력해주세요.'
+    });
   }
 
-  const room = store.createRoom({ roomName });
-  res.status(201).json({ code: room.code });
+  if (!name || name.length > 10) {
+    return res.status(400).json({
+      error: '이름은 1~10자로 입력해주세요.'
+    });
+  }
+
+  const room = store.createRoom({
+    roomName,
+    hostName: name
+  });
+
+  const host = store.getMember(room, room.hostMemberId);
+
+  res.status(201).json({
+    code: room.code,
+    memberId: host.memberId,
+    name: host.name
+  });
 });
 
 // 방 정보 조회 (코드 확인 겸용)

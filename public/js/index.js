@@ -60,21 +60,34 @@ document.getElementById('cancelBtn').addEventListener('click', () => dialog.clos
 // 방 만들기 확정
 document.getElementById('confirmBtn').addEventListener('click', async () => {
   dialogError.textContent = '';
+
   const name = getName();
   if (!name) return dialog.close();
 
-  const roomName = document.getElementById('roomNameInput').value.trim();
+  const roomName =
+    document.getElementById('roomNameInput').value.trim();
+
   if (!roomName) {
     dialogError.textContent = '방 이름을 입력해주세요.';
     return;
   }
+
+  const confirmBtn = document.getElementById('confirmBtn');
+  confirmBtn.disabled = true;
+
   try {
-    const { code } = await api('/api/rooms', {
+    const data = await api('/api/rooms', {
       method: 'POST',
-      body: { roomName },
+      body: { roomName, name },
     });
-    await joinAndGo(code, name);
+
+    // 생성자는 서버에서 이미 참여자로 등록됨
+    saveMember(data.code, data.memberId, data.name);
+
+    window.location.href = `/room.html?code=${data.code}`;
   } catch (e) {
     dialogError.textContent = e.message;
+  } finally {
+    confirmBtn.disabled = false;
   }
 });
