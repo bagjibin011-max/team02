@@ -1,56 +1,49 @@
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #f5f7fb;
-  color: #25324a;
-  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
-}
+/* Date scheduler design */
+/* Uses colors and Pretendard font from common.css */
 
 button {
-  font: inherit;
+  font-family: inherit;
   cursor: pointer;
-}
-
-button:focus-visible,
-a:focus-visible {
-  outline: 3px solid #7b9bff;
-  outline-offset: 3px;
 }
 
 /* Header */
 .site-header {
-  background: white;
-  border-bottom: 1px solid #e5e9f2;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
 }
 
 .header-inner {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: auto;
-  padding: 22px 24px;
+  padding: 20px 24px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .logo {
-  font-size: 21px;
+  color: var(--ink);
+  font-size: 24px;
   font-weight: 800;
-  color: #4968db;
 }
 
 .back-link {
-  color: #69778e;
-  text-decoration: none;
+  color: var(--ink-soft);
   font-size: 14px;
+  text-decoration: none;
 }
 
-/* Main page */
+.back-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* Main layout */
 .container {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 48px auto;
   padding: 0 24px;
 }
@@ -60,36 +53,41 @@ a:focus-visible {
 }
 
 .eyebrow {
-  color: #5875df;
+  color: var(--ink-soft);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 2px;
 }
 
 .page-heading h1 {
-  font-size: 32px;
-  margin: 12px 0;
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: 34px;
+  font-weight: 800;
 }
 
 .page-heading p {
-  color: #7a8699;
+  margin: 12px 0 0;
+  color: var(--ink-soft);
+  font-size: 16px;
 }
 
-/* Calendar and selection panels */
+/* Calendar and selected-date cards */
 .content-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 330px;
   align-items: start;
+  gap: 24px;
 }
 
 .calendar-card,
 .selection-card {
-  background: white;
-  border: 1px solid #e6eaf2;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
   border-radius: 18px;
   padding: 26px;
-  box-shadow: 0 6px 25px rgba(30, 50, 90, 0.04);
+
+  box-shadow: 0 8px 24px rgba(22, 33, 58, 0.04);
 }
 
 /* Reset button */
@@ -101,47 +99,58 @@ a:focus-visible {
 
 .reset-button {
   padding: 9px 14px;
+
   background: white;
-  border: 1px solid #dce3ef;
-  border-radius: 9px;
-  color: #60718f;
+  color: var(--ink);
+
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .reset-button:hover {
-  background: #fff1f2;
-  color: #e05a68;
-  border-color: #f3b6bd;
+  background: #fff4d5;
+  border-color: var(--accent);
 }
 
 /* Month navigation */
 .calendar-header {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 25px;
   margin-bottom: 30px;
 }
 
 .calendar-header h2 {
-  font-size: 22px;
-  margin: 0;
-  min-width: 150px;
+  min-width: 165px;
   text-align: center;
+
+  color: var(--ink);
+  font-size: 23px;
+  font-weight: 800;
 }
 
 .nav-button {
-  border: 1px solid #e5e9f2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 40px;
+  height: 40px;
+
   background: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  color: #53627e;
+  color: var(--ink);
+
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
 }
 
 .nav-button:hover {
-  background: #eef2ff;
+  background: #fff4d5;
+  border-color: var(--accent);
 }
 
 /* Calendar grid */
@@ -153,77 +162,106 @@ a:focus-visible {
 }
 
 .weekdays {
-  text-align: center;
   margin-bottom: 14px;
+  text-align: center;
+
+  color: var(--ink-soft);
   font-size: 13px;
-  color: #8390a3;
 }
 
 .weekdays span:first-child {
-  color: #e07079;
+  color: var(--danger);
 }
 
 .weekdays span:last-child {
-  color: #6486df;
+  color: #3c5b9e;
 }
 
-/* Date cell */
+/* Individual calendar dates */
 .day {
   position: relative;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
-  aspect-ratio: 1;
+
+  width: 100%;
   min-width: 0;
+  aspect-ratio: 1;
   padding: 5px;
+
+  background: #f6f8fb;
+  color: var(--ink);
+
   border: 0;
-  border-radius: 12px;
-  background: #f7f9fc;
-  color: #34415a;
-  transition: filter 0.15s;
+  border-radius: var(--radius);
+
+  transition: filter 0.15s ease;
 }
 
 .day:hover {
-  filter: brightness(0.94);
+  filter: brightness(0.95);
+}
+
+.day:disabled {
+  cursor: wait;
 }
 
 .day-number {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .day-count {
+  color: var(--ink);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* My selected date: dark border */
+/* My selected dates have a navy border. */
 .day.my-selected {
-  box-shadow: inset 0 0 0 3px #17358b;
+  box-shadow: inset 0 0 0 3px var(--ink);
 }
 
-/* Most popular date: gold star */
+/* Dates with the most votes have a star. */
 .day.top-date::after {
   content: "★";
+
   position: absolute;
-  top: 4px;
-  right: 6px;
-  color: #e8a82d;
-  font-size: 12px;
+  top: 5px;
+  right: 7px;
+
+  color: var(--ink);
+  font-size: 13px;
   line-height: 1;
+}
+
+/* A red dot indicates an unsaved change. */
+.day.pending-date::before {
+  content: "";
+
+  position: absolute;
+  top: 8px;
+  left: 8px;
+
+  width: 7px;
+  height: 7px;
+
+  background: var(--danger);
+  border-radius: 50%;
 }
 
 /* Today indicator */
 .day.today {
-  outline: 2px dashed #526fe4;
-  outline-offset: -2px;
+  outline: 2px dashed var(--ink-soft);
+  outline-offset: -3px;
 }
 
-/* Currently focused date */
+/* Focused date */
 .day.focused-date {
-  outline: 2px solid #7c94d8;
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
@@ -231,105 +269,192 @@ a:focus-visible {
   aspect-ratio: 1;
 }
 
-/* Calendar legend */
+/* Calendar footer and legend */
 .calendar-footer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 14px;
+
   margin-top: 24px;
-  color: #7a8699;
-  font-size: 13px;
+
+  color: var(--ink-soft);
+  font-size: 12px;
 }
 
 .legend-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
 .legend-my {
-  width: 13px;
-  height: 13px;
-  background: #dfe8ff;
-  border: 2px solid #17358b;
+  width: 14px;
+  height: 14px;
+
+  border: 2px solid var(--ink);
   border-radius: 3px;
+  background: #fff6dc;
 }
 
 .legend-popular {
-  width: 13px;
-  height: 13px;
-  background: #5278d6;
+  width: 14px;
+  height: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #fff8df,
+    #ffc83d
+  );
+
   border-radius: 3px;
+}
+
+.legend-star {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
 }
 
 #today-button {
   margin-left: auto;
   padding: 8px 12px;
-  border: 1px solid #e5e9f2;
-  border-radius: 8px;
+
   background: white;
-  color: #53627e;
+  color: var(--ink);
+
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+
+  font-size: 12px;
 }
 
-/* Selected dates panel */
+#today-button:hover {
+  background: #fff4d5;
+  border-color: var(--accent);
+}
+
+/* Selected-date panel */
 .selection-card h2 {
-  font-size: 20px;
-  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 21px;
+  font-weight: 800;
 }
 
 .selection-description {
+  margin-top: 12px;
+
+  color: var(--ink-soft);
   font-size: 13px;
-  color: #8390a3;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .selection-count {
-  margin: 25px 0 14px;
+  margin: 26px 0 14px;
+
+  color: var(--ink);
   font-size: 15px;
 }
 
 .selection-count strong {
-  color: #526fe4;
-  font-size: 22px;
+  color: var(--ink);
+  font-size: 23px;
 }
 
+/* Scrollable date list */
 .selected-list {
   list-style: none;
+
   padding: 0;
-  min-height: 130px;
-  max-height: 260px;
+  margin: 0 0 20px;
+
+  min-height: 120px;
+  max-height: 300px;
+
   overflow-y: auto;
 }
 
-.selected-list li {
-  background: #f0f4ff;
-  color: #4661c5;
-  padding: 12px;
+/* Selected-date row */
+.selected-date-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 9px 10px 9px 13px;
   margin-bottom: 8px;
-  border-radius: 9px;
-  font-size: 14px;
+
+  background: #f6f8fb;
+  border: 1px solid #e7ebf1;
+  border-radius: var(--radius);
+
+  color: var(--ink);
+  font-size: 13px;
 }
 
-.selected-list .empty-message {
-  background: #f7f9fc;
-  color: #96a0af;
+.selected-date-item span {
+  flex: 1;
+}
+
+/* Remove button next to a selected date */
+.remove-date {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: white;
+  color: var(--ink-soft);
+
+  font-size: 22px;
+  line-height: 1;
+}
+
+.remove-date:hover {
+  background: #ffe8e7;
+  color: var(--danger);
+}
+
+.remove-date:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.empty-message {
+  padding: 18px 12px;
+
+  background: #f6f8fb;
+  color: var(--ink-soft);
+
+  border-radius: var(--radius);
+
   text-align: center;
+  font-size: 13px;
 }
 
-/* Save button */
+/* Yellow save button */
 .save-button {
   width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: #526fe4;
-  color: white;
   padding: 15px;
-  font-weight: 700;
+
+  background: var(--accent);
+  color: var(--accent-ink);
+
+  border: 0;
+  border-radius: var(--radius);
+
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .save-button:hover {
-  background: #3f5bc9;
+  filter: brightness(0.96);
 }
 
 .save-button:disabled {
@@ -337,74 +462,114 @@ a:focus-visible {
   cursor: not-allowed;
 }
 
+/* Save feedback */
 .save-status {
-  min-height: 20px;
-  font-size: 13px;
+  min-height: 24px;
+  margin: 14px 0 0;
+
+  color: var(--ink-soft);
   text-align: center;
-  color: #4968db;
+
+  font-size: 13px;
   line-height: 1.6;
+
+  overflow-wrap: anywhere;
 }
 
-/* Voting detail panel */
+/* Date voting details */
 .vote-details {
-  margin-top: 22px;
-  padding: 18px;
-  background: #f7f9ff;
-  border: 1px solid #e3eaff;
-  border-radius: 12px;
+  margin-top: 24px;
+  padding: 20px;
+
+  background: #f8fafc;
+
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
 }
 
 .vote-details h3 {
-  margin: 0 0 10px;
-  font-size: 16px;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 800;
 }
 
 .detail-count {
-  color: #526fe4;
+  margin: 10px 0;
+
+  color: var(--ink);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .detail-hint {
   margin: 0;
-  color: #8390a3;
+
+  color: var(--ink-soft);
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
+/* Unsaved voting changes */
+.detail-pending {
+  margin: 8px 0;
+
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* Most popular date label */
 .top-message {
-  color: #a36b0b;
-  font-size: 13px;
-  font-weight: 700;
+  display: inline-block;
+  padding: 5px 9px;
+
+  background: #fff0bc;
+  color: var(--ink);
+
+  border-radius: 7px;
+
+  font-size: 12px;
+  font-weight: 800;
 }
 
+/* Participant names */
 .voter-names {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+
   margin-top: 14px;
 }
 
 .voter-badge {
+  display: inline-flex;
+  align-items: center;
+
   padding: 7px 12px;
+
   background: white;
-  border: 1px solid #dce5fa;
+  color: var(--ink);
+
+  border: 1px solid var(--line);
   border-radius: 20px;
-  color: #3f5ba6;
+
   font-size: 13px;
+  font-weight: 600;
 }
 
+/* Storage information */
 .preview-notice {
   margin-top: 24px;
-  color: #8390a3;
-  font-size: 13px;
-  line-height: 1.6;
+
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.7;
 }
 
-/* Responsive layout */
-@media (max-width: 760px) {
+/* Tablet and mobile layout */
+@media (max-width: 780px) {
   .container {
-    margin-top: 30px;
+    padding: 0 16px;
+    margin: 28px auto;
   }
 
   .content-layout {
@@ -417,12 +582,16 @@ a:focus-visible {
   }
 
   .page-heading h1 {
-    font-size: 26px;
+    font-size: 28px;
+  }
+
+  .logo {
+    font-size: 20px;
   }
 
   .weekdays,
   .calendar-grid {
-    gap: 4px;
+    gap: 5px;
   }
 
   .day-number {
@@ -434,8 +603,44 @@ a:focus-visible {
   }
 
   .day.top-date::after {
+    top: 3px;
+    right: 4px;
+    font-size: 10px;
+  }
+
+  .calendar-footer {
+    gap: 10px;
+  }
+}
+
+/* Small phone layout */
+@media (max-width: 420px) {
+  .calendar-card {
+    padding: 12px;
+  }
+
+  .day {
+    border-radius: 8px;
+  }
+
+  .day-number {
+    font-size: 12px;
+  }
+
+  .day-count {
     font-size: 9px;
-    top: 2px;
-    right: 3px;
+  }
+
+  .calendar-header {
+    gap: 12px;
+  }
+
+  .calendar-header h2 {
+    min-width: 135px;
+    font-size: 19px;
+  }
+
+  .day.my-selected {
+    box-shadow: inset 0 0 0 2px var(--ink);
   }
 }
