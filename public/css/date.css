@@ -1,6 +1,6 @@
 
-/* Date scheduler design */
-/* Uses colors and Pretendard font from common.css */
+/* Date scheduler page */
+/* Uses Pretendard and shared variables from common.css */
 
 button {
   font-family: inherit;
@@ -72,7 +72,7 @@ button {
   font-size: 16px;
 }
 
-/* Calendar and selected-date cards */
+/* Content cards */
 .content-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
@@ -126,17 +126,17 @@ button {
 
 .calendar-header h2 {
   min-width: 165px;
-  text-align: center;
 
   color: var(--ink);
+  text-align: center;
   font-size: 23px;
   font-weight: 800;
 }
 
 .nav-button {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   width: 40px;
   height: 40px;
@@ -153,7 +153,7 @@ button {
   border-color: var(--accent);
 }
 
-/* Calendar grid */
+/* Calendar layout */
 .weekdays,
 .calendar-grid {
   display: grid;
@@ -163,9 +163,9 @@ button {
 
 .weekdays {
   margin-bottom: 14px;
-  text-align: center;
 
   color: var(--ink-soft);
+  text-align: center;
   font-size: 13px;
 }
 
@@ -177,14 +177,14 @@ button {
   color: #3c5b9e;
 }
 
-/* Individual calendar dates */
+/* Date cells */
 .day {
   position: relative;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 5px;
 
   width: 100%;
@@ -195,7 +195,7 @@ button {
   background: #f6f8fb;
   color: var(--ink);
 
-  border: 0;
+  border: none;
   border-radius: var(--radius);
 
   transition: filter 0.15s ease;
@@ -220,12 +220,12 @@ button {
   font-weight: 700;
 }
 
-/* My selected dates have a navy border. */
+/* Navy border for selected dates */
 .day.my-selected {
   box-shadow: inset 0 0 0 3px var(--ink);
 }
 
-/* Dates with the most votes have a star. */
+/* Star for dates with the highest vote count */
 .day.top-date::after {
   content: "★";
 
@@ -238,7 +238,7 @@ button {
   line-height: 1;
 }
 
-/* A red dot indicates an unsaved change. */
+/* Red dot for dates with unsaved changes */
 .day.pending-date::before {
   content: "";
 
@@ -253,13 +253,13 @@ button {
   border-radius: 50%;
 }
 
-/* Today indicator */
+/* Today */
 .day.today {
   outline: 2px dashed var(--ink-soft);
   outline-offset: -3px;
 }
 
-/* Focused date */
+/* Currently viewed date */
 .day.focused-date {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -269,7 +269,7 @@ button {
   aspect-ratio: 1;
 }
 
-/* Calendar footer and legend */
+/* Calendar legend */
 .calendar-footer {
   display: flex;
   align-items: center;
@@ -289,15 +289,21 @@ button {
 }
 
 .legend-my {
+  display: inline-block;
+
   width: 14px;
   height: 14px;
 
   border: 2px solid var(--ink);
   border-radius: 3px;
   background: #fff6dc;
+
+  flex-shrink: 0;
 }
 
 .legend-popular {
+  display: inline-block;
+
   width: 14px;
   height: 14px;
 
@@ -308,12 +314,26 @@ button {
   );
 
   border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .legend-star {
   color: var(--ink);
   font-size: 15px;
   font-weight: 900;
+}
+
+/* Always visible on both desktop and mobile */
+.legend-pending {
+  display: inline-block;
+
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+
+  background-color: var(--danger);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 #today-button {
@@ -334,7 +354,7 @@ button {
   border-color: var(--accent);
 }
 
-/* Selected-date panel */
+/* Selected date panel */
 .selection-card h2 {
   color: var(--ink);
   font-size: 21px;
@@ -361,7 +381,7 @@ button {
   font-size: 23px;
 }
 
-/* Scrollable date list */
+/* Scrollable selected date list */
 .selected-list {
   list-style: none;
 
@@ -370,11 +390,10 @@ button {
 
   min-height: 120px;
   max-height: 300px;
-
   overflow-y: auto;
 }
 
-/* Selected-date row */
+/* One selected date */
 .selected-date-item {
   display: flex;
   align-items: center;
@@ -396,17 +415,17 @@ button {
   flex: 1;
 }
 
-/* Remove button next to a selected date */
+/* X button for removing a selected date */
 .remove-date {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   flex: 0 0 30px;
   width: 30px;
   height: 30px;
 
-  border: 0;
+  border: none;
   border-radius: 8px;
 
   background: white;
@@ -438,7 +457,7 @@ button {
   font-size: 13px;
 }
 
-/* Yellow save button */
+/* Save button */
 .save-button {
   width: 100%;
   padding: 15px;
@@ -446,7 +465,7 @@ button {
   background: var(--accent);
   color: var(--accent-ink);
 
-  border: 0;
+  border: none;
   border-radius: var(--radius);
 
   font-size: 15px;
@@ -474,6 +493,16 @@ button {
   line-height: 1.6;
 
   overflow-wrap: anywhere;
+}
+
+/* Red only for unsaved changes */
+.save-status.status-warning {
+  color: var(--danger);
+}
+
+/* Red for server errors */
+.save-status.status-error {
+  color: var(--danger);
 }
 
 /* Date voting details */
@@ -509,7 +538,7 @@ button {
   line-height: 1.7;
 }
 
-/* Unsaved voting changes */
+/* Unsaved changes notice */
 .detail-pending {
   margin: 8px 0;
 
@@ -517,7 +546,7 @@ button {
   font-size: 12px;
 }
 
-/* Most popular date label */
+/* Most popular date */
 .top-message {
   display: inline-block;
   padding: 5px 9px;
@@ -556,7 +585,7 @@ button {
   font-weight: 600;
 }
 
-/* Storage information */
+/* Storage notice */
 .preview-notice {
   margin-top: 24px;
 
@@ -565,7 +594,7 @@ button {
   line-height: 1.7;
 }
 
-/* Tablet and mobile layout */
+/* Tablet layout */
 @media (max-width: 780px) {
   .container {
     padding: 0 16px;
@@ -643,16 +672,4 @@ button {
   .day.my-selected {
     box-shadow: inset 0 0 0 2px var(--ink);
   }
-
-
-/* Legend for unsaved date changes */
-  .legend-pending {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    background-color: var(--danger);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
 }
