@@ -1,92 +1,62 @@
 /* 공통 스타일 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
 :root {
-  --bg: #f5f7fb;
+  --bg: #f2f5f9;
   --surface: #ffffff;
-  --text: #25324a;
-  --muted: #7a8699;
-  --primary: #526fe4;
-  --primary-dark: #3f5bc9;
-  --primary-text: #4968db;
-  --primary-soft: #eaf0ff;
-  --border: #e5e9f2;
-  --danger: #e05a68;
-  --focus: #7b9bff;
+  --ink: #16213a;
+  --ink-soft: #5b6578;
+  --line: #d9dfe9;
+  --accent: #ffc83d;      /* 강조(최다 인원 날짜 등)에도 사용 */
+  --accent-ink: #16213a;
+  --danger: #c2362f;
+  --radius: 12px;
 }
 
 * { box-sizing: border-box; }
 
+html, body { margin: 0; min-height: 100%; }
+
 body {
-  margin: 0;
+  font-family: "Pretendard", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: var(--bg);
-  color: var(--text);
-  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+  color: var(--ink);
+  line-height: 1.5;
 }
 
-button { font: inherit; cursor: pointer; }
+h1, h2, h3 { margin: 0; letter-spacing: -0.02em; }
 
-button:focus-visible,
-a:focus-visible,
-.input:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
-
-/* 헤더 (모든 화면 공통) */
-.site-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-}
-.header-inner {
-  max-width: 1100px;
-  margin: auto;
-  padding: 22px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.logo { font-size: 21px; font-weight: 800; color: var(--primary-text); }
-.back-link { color: #69778e; text-decoration: none; font-size: 14px; }
-
-/* 카드 */
-.card {
-  background: var(--surface);
-  border: 1px solid #e6eaf2;
-  border-radius: 18px;
-  padding: 26px;
-  box-shadow: 0 6px 25px rgba(30, 50, 90, 0.04);
-}
-
-/* 입력칸: class="input" 을 붙여서 사용 */
-.input {
-  width: 100%;
-  padding: 14px 16px;
+input {
   font: inherit;
   color: inherit;
+  width: 100%;
+  padding: 14px 16px;
   background: var(--surface);
-  border: 1px solid #dce3ef;
-  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+}
+input:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* 버튼 */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font: inherit;
+  font-weight: 700;
   padding: 14px 22px;
   border: 0;
-  border-radius: 10px;
-  background: var(--primary);
+  border-radius: var(--radius);
+  background: var(--ink);
   color: #fff;
-  font-weight: 700;
+  cursor: pointer;
   text-decoration: none;
 }
-.btn:hover { background: var(--primary-dark); }
-.btn-ghost {
-  background: var(--surface);
-  color: #60718f;
-  border: 1px solid #dce3ef;
-}
-.btn-ghost:hover { background: #f0f4ff; }
+.btn:hover { filter: brightness(1.15); }
+.btn-accent { background: var(--accent); color: var(--accent-ink); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
 
 .error { color: var(--danger); font-size: 0.9rem; min-height: 1.3em; margin: 0; }
 
