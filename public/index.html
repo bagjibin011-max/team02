@@ -8,10 +8,16 @@
   <link rel="stylesheet" href="/css/room.css">
 </head>
 <body>
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="logo">우리 언제 만나?</span>
+    </div>
+  </header>
+
   <main class="home">
     <div class="home-name">
       <label for="nameInput">이름</label>
-      <input id="nameInput" type="text" maxlength="10" placeholder="모임에서 보여줄 이름" autocomplete="off">
+      <input id="nameInput" class="input" type="text" maxlength="10" placeholder="모임에서 보여줄 이름" autocomplete="off">
     </div>
 
     <section class="home-body">
@@ -19,13 +25,13 @@
       <p class="lead">초대 코드가 있으면 입력하고, 없으면 새 방을 만드세요.</p>
 
       <div class="code-row">
-        <input id="codeInput" type="text" maxlength="6" placeholder="초대 코드 6자리" autocomplete="off" aria-label="초대 코드">
+        <input id="codeInput" class="input" type="text" maxlength="6" placeholder="초대 코드 6자리" autocomplete="off" aria-label="초대 코드">
         <button id="joinBtn" class="btn" type="button">참여하기</button>
       </div>
       <p id="error" class="error" role="alert"></p>
 
       <div class="divider">또는</div>
-      <button id="createBtn" class="btn btn-accent" type="button">방 만들기</button>
+      <button id="createBtn" class="btn" type="button">새 방 만들기</button>
     </section>
   </main>
 
@@ -33,7 +39,7 @@
     <h2>새 방 만들기</h2>
     <div class="field">
       <label for="roomNameInput">방 이름</label>
-      <input id="roomNameInput" type="text" maxlength="30" placeholder="예: 11월 동아리 회식">
+      <input id="roomNameInput" class="input" type="text" maxlength="30" placeholder="예: 11월 동아리 회식">
     </div>
     <p id="dialogError" class="error" role="alert"></p>
     <div class="dialog-actions">
