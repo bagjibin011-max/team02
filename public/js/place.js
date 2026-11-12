@@ -233,3 +233,12 @@ originForm.addEventListener("submit", async (event) => {
     });
   }
 });
+
+const backToRoom = document.querySelector("#back-to-room");
+const roomCode = getCode();
+
+if (roomCode) {
+  backToRoom.href =
+    `/room.html?code=${encodeURIComponent(roomCode)}`;
+  backToRoom.hidden = false;
+}
