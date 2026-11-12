@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>장소 정하기</title>
   <link rel="stylesheet" href="./css/place.css">
+  <script src="./js/common.js"></script>
+  <script type="module" src="./js/place.js"></script>
   <script type="module" src="./js/place.js"></script>
 </head>
 <body>
   <header>
+    <a id=""back-to-room" hidden>← 방으로 돌아가기</a>
     <h1>장소 정하기</h1>
   </header>
 
@@ -42,7 +45,7 @@
 
         <p id="origin-status" role="status"></p>
     </section>
-    
+
     <!-- 2단계: 후보 투표 -->
     <section id="vote-section" hidden>
       <h2>만나고 싶은 장소에 투표해주세요</h2>

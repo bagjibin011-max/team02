@@ -159,15 +159,25 @@ originResults.addEventListener("change", () => {
   voteStatus.textContent = "";
 });
 
-originForm.addEventListener("submit", (event) => {
+originForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) {
+    originStatus.textContent =
+      "첫 화면에서 방에 참여한 뒤 장소 화면으로 들어와주세요.";
+    return;
+  }
 
   const selected = originResults.querySelector(
     'input[name="origin"]:checked'
   );
 
   if (!selected) {
-    originStatus.textContent = "검색 결과에서 출발지를 선택해주세요.";
+    originStatus.textContent =
+      "검색 결과에서 출발지를 선택해주세요.";
     return;
   }
 
@@ -175,13 +185,60 @@ originForm.addEventListener("submit", (event) => {
     (item) => item.id === selected.value
   );
 
-  state.originId = origin.id;
-  state.candidateId = null;
+  if (!origin) {
+    originStatus.textContent = "올바른 출발지를 선택해주세요.";
+    return;
+  }
 
-  originStatus.textContent =
-    `${origin.name}을 출발지로 선택했습니다. (서버 저장 전)`;
+  // 요청 중에는 입력을 잠시 막음
+  const controls = [
+    ...originSearchForm.querySelectorAll("input, button"),
+    ...originForm.querySelectorAll("input, button")
+  ];
 
+  controls.forEach((control) => {
+    control.disabled = true;
+  });
+
+  originStatus.textContent = "출발지를 저장하는 중입니다.";
+  voteSection.hidden = true;
   voteStatus.textContent = "";
-  renderCandidates();
-  voteSection.hidden = false;
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/origin`,
+      {
+        method: "PUT",
+        body: {
+          memberId,
+          originId: origin.id
+        }
+      }
+    );
+
+    state.originId = result.originId;
+    state.candidateId = null;
+
+    originStatus.textContent =
+      `${origin.name} 저장 완료! ` +
+      `출발지 입력: ${result.savedCount}/${result.memberCount}명`;
+
+    renderCandidates();
+    voteSection.hidden = false;
+  } catch (error) {
+    originStatus.textContent = error.message;
+  } finally {
+    controls.forEach((control) => {
+      control.disabled = false;
+    });
+  }
 });
+
+const backToRoom = document.querySelector("#back-to-room");
+const roomCode = getCode();
+
+if (roomCode) {
+  backToRoom.href =
+    `/room.html?code=${encodeURIComponent(roomCode)}`;
+  backToRoom.hidden = false;
+}
