@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 
 const roomsRouter = require('./routes/rooms');
+const datesRouter = require('./routes/dates');
 const placesRouter = require('./routes/places');
 
 const app = express();
@@ -11,7 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/rooms', roomsRouter); // A: 방 생성·참여
-//B: dates.js 추가 예정
+app.use('/api/rooms', datesRouter);
 app.use('/api/rooms', placesRouter);
 
 app.listen(PORT, () => {
