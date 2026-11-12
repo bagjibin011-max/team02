@@ -3,7 +3,7 @@
 //
 // 방 구조:
 // {
-//   code, roomName, startDate, endDate, purpose, stage, createdAt,
+//   code, roomName, stage, createdAt,
 //   members:      [{ memberId, name }],
 //   availability: { [memberId]: ["2026-11-20", ...] },
 //   origins:      { [memberId]: "originId" },
@@ -29,14 +29,11 @@ function generateCode() {
   return code;
 }
 
-function createRoom({ roomName, startDate, endDate, purpose }) {
+function createRoom({ roomName }) {
   const code = generateCode();
   const room = {
     code,
     roomName,
-    startDate: startDate || null,
-    endDate: endDate || null,
-    purpose: purpose || null,
     stage: 'origin', // 장소 단계: origin → vote → result (C가 사용)
     createdAt: new Date().toISOString(),
     members: [],

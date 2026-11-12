@@ -7,7 +7,6 @@ const store = require('../store');
 // 방 만들기
 router.post('/', (req, res) => {
   const roomName = String(req.body.roomName || '').trim();
-  const purpose = String(req.body.purpose || '').trim();
 
   if (!roomName) {
     return res.status(400).json({ error: '방 이름을 입력해주세요.' });
@@ -16,7 +15,7 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: '방 이름은 30자 이내로 입력해주세요.' });
   }
 
-  const room = store.createRoom({ roomName, purpose });
+  const room = store.createRoom({ roomName });
   res.status(201).json({ code: room.code });
 });
 
