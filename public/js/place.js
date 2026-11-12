@@ -8,7 +8,8 @@ const voteStatus = document.querySelector("#vote-status");
 
 const state = {
   originId: null,
-  candidateId: null
+  candidateId: null,
+  closed: false
 };
 
 // 화면 동작 확인용 예시 데이터
@@ -278,7 +279,7 @@ originForm.addEventListener("submit", async (event) => {
       `출발지 입력: ${result.savedCount}/${result.memberCount}명`;
 
     renderCandidates();
-    voteSection.hidden = false;
+    voteSection.hidden = state.closed;
   } catch (error) {
     originStatus.textContent = error.message;
   } finally {
@@ -361,7 +362,7 @@ async function loadSavedOrigin() {
       `출발지 입력: ${result.savedCount}/${result.memberCount}명`;
 
     renderCandidates();
-    voteSection.hidden = false;
+    voteSection.hidden = state.closed;
   } catch (error) {
     originStatus.textContent = error.message;
   } finally {
@@ -371,17 +372,57 @@ async function loadSavedOrigin() {
   }
 }
 
-loadSavedOrigin();
-
 const refreshVotes = document.querySelector("#refresh-votes");
 const voteSummary = document.querySelector("#vote-summary");
 const voteCounts = document.querySelector("#vote-counts");
 
+const hostControls = document.querySelector("#host-controls");
+const closeVote = document.querySelector("#close-vote");
+const placeStatus = document.querySelector("#place-status");
+
+const originSection = document.querySelector("#origin-section");
+const resultSection = document.querySelector("#result-section");
+const finalPlace = document.querySelector("#final-place");
+const finalVotes = document.querySelector("#final-votes");
+
 let isLoadingVotes = false;
+let isClosing = false;
+
+function showFinalResult(result) {
+  state.closed = true;
+
+  originSection.hidden = true;
+  voteSection.hidden = true;
+  hostControls.hidden = true;
+  resultSection.hidden = false;
+
+  placeStatus.textContent = "방장이 장소 투표를 마감했습니다.";
+
+  const winners = candidates.filter((candidate) =>
+    result.winnerIds.includes(candidate.id)
+  );
+
+  if (result.voteCount === 0) {
+    finalPlace.textContent = "투표 없이 마감되어 선정된 장소가 없습니다.";
+    finalVotes.textContent = "총 0표";
+    return;
+  }
+
+  const names = winners.map((candidate) => candidate.name).join(", ");
+  const topVotes = result.counts[winners[0].id];
+
+  finalPlace.textContent = winners.length > 1
+    ? `공동 1위: ${names}`
+    : `최종 장소: ${names}`;
+
+  finalVotes.textContent = winners.length > 1
+    ? `각 ${topVotes}표 · 총 ${result.voteCount}표`
+    : `${topVotes}표 · 총 ${result.voteCount}표`;
+}
 
 async function loadVoteCounts() {
-  // 투표 화면이 숨겨져 있거나 이미 조회 중이면 건너뜀
-  if (voteSection.hidden || isLoadingVotes) return;
+  // 출발지 입력 전에도 마감 여부를 확인
+  if (isLoadingVotes || isClosing) return;
 
   const code = getCode();
   const memberId = getMemberId(code);
@@ -397,8 +438,17 @@ async function loadVoteCounts() {
       `?memberId=${encodeURIComponent(memberId)}`
     );
 
-    // 요청 중 출발지 수정 화면으로 돌아갔다면 표시하지 않음
-    if (voteSection.hidden) return;
+    if (result.stage === "result") {
+      showFinalResult(result);
+      return;
+    }
+
+    // 마감 후 늦게 도착한 이전 응답은 무시
+    if (state.closed) return;
+
+    hostControls.hidden = !result.isHost;
+    placeStatus.textContent =
+      "방장이 마감하기 전까지 투표를 변경할 수 있습니다.";
 
     voteCounts.replaceChildren();
 
@@ -414,18 +464,72 @@ async function loadVoteCounts() {
       `투표 참여: ${result.voteCount}/${result.memberCount}명` +
       " · 4초마다 자동 갱신";
   } catch (error) {
-    voteSummary.textContent =
-      `현황 갱신 실패: ${error.message} (표시는 이전 조회 결과)`;
+    placeStatus.textContent =
+      `현황 조회 실패: ${error.message}`;
   } finally {
     isLoadingVotes = false;
     refreshVotes.disabled = false;
   }
 }
 
+closeVote.addEventListener("click", async () => {
+  if (isClosing || state.closed) return;
+
+  if (!window.confirm(
+    "장소 투표를 마감할까요? 마감 후에는 변경할 수 없습니다."
+  )) {
+    return;
+  }
+
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) return;
+
+  isClosing = true;
+  closeVote.disabled = true;
+  placeStatus.textContent = "투표를 마감하는 중입니다.";
+
+  try {
+    await api(
+      `/api/rooms/${encodeURIComponent(code)}/vote/close`,
+      {
+        method: "POST",
+        body: { memberId }
+      }
+    );
+
+    state.closed = true;
+    originSection.hidden = true;
+    voteSection.hidden = true;
+    hostControls.hidden = true;
+
+    placeStatus.textContent =
+      "마감되었습니다. 결과를 불러오는 중입니다.";
+  } catch (error) {
+    placeStatus.textContent = error.message;
+  } finally {
+    isClosing = false;
+    closeVote.disabled = false;
+  }
+
+  if (state.closed) {
+    await loadVoteCounts();
+  }
+});
+
 refreshVotes.addEventListener("click", loadVoteCounts);
 
-setInterval(() => {
-  if (!document.hidden) {
-    loadVoteCounts();
-  }
-}, 4000);
+// 저장된 입력을 복원한 뒤 마감 상태 확인
+async function initializePlace() {
+  await loadSavedOrigin();
+  await loadVoteCounts();
+
+  setInterval(() => {
+    if (!document.hidden) {
+      loadVoteCounts();
+    }
+  }, 4000);
+}
+
+initializePlace();

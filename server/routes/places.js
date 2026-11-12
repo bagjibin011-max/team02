@@ -161,10 +161,46 @@ router.get('/:code/votes', (req, res) => {
     0
   );
 
+  const maxVotes = Math.max(...Object.values(counts));
+
+  const winnerIds = maxVotes > 0
+    ? Object.keys(counts).filter((id) => counts[id] === maxVotes)
+    : [];
+
   res.json({
     counts,
     voteCount,
-    memberCount: room.members.length
+    memberCount: room.members.length,
+    stage: room.stage,
+    isHost: member.memberId === room.hostMemberId,
+    winnerIds: room.stage === 'result' ? winnerIds : []
+  });
+});
+
+  // 방장이 장소 투표 마감
+router.post('/:code/vote/close', (req, res) => {
+  const room = store.getRoom(req.params.code);
+
+  if (!room) {
+    return res.status(404).json({
+      error: '존재하지 않는 방입니다.'
+    });
+  }
+
+  const { memberId } = req.body || {};
+  const member = store.getMember(room, memberId);
+
+  if (!member || memberId !== room.hostMemberId) {
+    return res.status(403).json({
+      error: '방장만 투표를 마감할 수 있습니다.'
+    });
+  }
+
+  // 이미 마감된 경우에도 같은 상태 반환
+  room.stage = 'result';
+
+  res.json({
+    stage: room.stage
   });
 });
 
