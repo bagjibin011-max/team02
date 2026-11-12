@@ -29,18 +29,25 @@ function generateCode() {
   return code;
 }
 
-function createRoom({ roomName }) {
+function createRoom({ roomName, hostName }) {
   const code = generateCode();
+
   const room = {
     code,
     roomName,
-    stage: 'origin', // 장소 단계: origin → vote → result (C가 사용)
+    hostMemberId: null,
+    stage: 'origin',
     createdAt: new Date().toISOString(),
     members: [],
     availability: {},
     origins: {},
     votes: {},
   };
+
+  // 방 생성 요청 안에서 생성자를 참여자로 등록
+  const host = addMember(room, hostName);
+  room.hostMemberId = host.memberId;
+
   rooms[code] = room;
   return room;
 }
@@ -68,6 +75,7 @@ function toPublicRoom(room) {
   return {
     code: room.code,
     roomName: room.roomName,
+    hostMemberId: room.hostMemberId,
     startDate: room.startDate,
     endDate: room.endDate,
     purpose: room.purpose,
