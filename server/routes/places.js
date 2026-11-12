@@ -46,4 +46,30 @@ router.put('/:code/origin', (req, res) => {
   });
 });
 
+// 내 출발지 조회
+router.get('/:code/origin', (req, res) => {
+  const room = store.getRoom(req.params.code);
+
+  if (!room) {
+    return res.status(404).json({
+      error: '존재하지 않는 방입니다.'
+    });
+  }
+
+  const memberId = req.query.memberId;
+  const member = store.getMember(room, memberId);
+
+  if (!member) {
+    return res.status(403).json({
+      error: '이 방에 먼저 참여해주세요.'
+    });
+  }
+
+  res.json({
+    originId: room.origins[memberId] || null,
+    savedCount: Object.keys(room.origins).length,
+    memberCount: room.members.length
+  });
+});
+
 module.exports = router;
