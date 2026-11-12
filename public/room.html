@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>약속 조율 방</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/room.css">
+</head>
+<body>
+  <main class="room">
+    <header class="room-top">
+      <div class="count" id="count">👥 0명</div>
+      <div class="code-box">
+        <p class="label">초대 코드</p>
+        <div class="code-tiles" id="codeTiles" aria-label="초대 코드"></div>
+        <button id="copyBtn" class="copy-btn" type="button">코드 복사</button>
+      </div>
+      <div></div>
+    </header>
+
+    <h1 class="room-title" id="roomName"></h1>
+
+    <nav class="menu">
+      <a id="dateLink" href="#"><span class="icon">📅</span>날짜<small>가능한 날 고르기</small></a>
+      <a id="placeLink" href="#"><span class="icon">📍</span>장소<small>출발지 입력 · 투표</small></a>
+    </nav>
+
+    <section class="members">
+      <h2>참여자</h2>
+      <ul id="memberList"></ul>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/room.js"></script>
+</body>
+</html>
