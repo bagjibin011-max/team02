@@ -123,4 +123,49 @@ router.put('/:code/vote', (req, res) => {
   });
 });
 
+// 후보별 투표 현황 조회
+router.get('/:code/votes', (req, res) => {
+  const room = store.getRoom(req.params.code);
+
+  if (!room) {
+    return res.status(404).json({
+      error: '존재하지 않는 방입니다.'
+    });
+  }
+
+  const member = store.getMember(room, req.query.memberId);
+
+  if (!member) {
+    return res.status(403).json({
+      error: '이 방에 먼저 참여해주세요.'
+    });
+  }
+
+  const counts = {
+    'sample-a': 0,
+    'sample-b': 0,
+    'sample-c': 0
+  };
+
+  // 현재 방 참여자의 유효한 표만 집계
+  room.members.forEach((member) => {
+    const candidateId = room.votes[member.memberId];
+
+    if (Object.hasOwn(counts, candidateId)) {
+      counts[candidateId] += 1;
+    }
+  });
+
+  const voteCount = Object.values(counts).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+
+  res.json({
+    counts,
+    voteCount,
+    memberCount: room.members.length
+  });
+});
+
 module.exports = router;

@@ -372,3 +372,44 @@ async function loadSavedOrigin() {
 }
 
 loadSavedOrigin();
+
+const refreshVotes = document.querySelector("#refresh-votes");
+const voteSummary = document.querySelector("#vote-summary");
+const voteCounts = document.querySelector("#vote-counts");
+
+refreshVotes.addEventListener("click", async () => {
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) {
+    voteSummary.textContent = "방에 먼저 참여해주세요.";
+    return;
+  }
+
+  refreshVotes.disabled = true;
+  voteCounts.replaceChildren();
+  voteSummary.textContent = "투표 현황을 불러오는 중입니다.";
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/votes` +
+      `?memberId=${encodeURIComponent(memberId)}`
+    );
+
+    candidates.forEach((candidate) => {
+      const li = document.createElement("li");
+      li.textContent =
+        `${candidate.name}: ${result.counts[candidate.id] ?? 0}표`;
+
+      voteCounts.append(li);
+    });
+
+    voteSummary.textContent =
+      `조회 시점 투표 참여: ` +
+      `${result.voteCount}/${result.memberCount}명`;
+  } catch (error) {
+    voteSummary.textContent = error.message;
+  } finally {
+    refreshVotes.disabled = false;
+  }
+});
