@@ -42,6 +42,7 @@ function renderCandidates() {
     input.name = "candidate";
     input.value = candidate.id;
     input.required = true;
+    input.checked = candidate.id === state.candidateId;
 
     const info = document.createElement("div");
 
@@ -58,8 +59,16 @@ function renderCandidates() {
 }
 
 
-voteForm.addEventListener("submit", (event) => {
+voteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  const code = getCode();
+  const memberId = getMemberId(code);
+
+  if (!code || !memberId) {
+    voteStatus.textContent = "방에 먼저 참여해주세요.";
+    return;
+  }
 
   const selected = candidateList.querySelector(
     'input[name="candidate"]:checked'
@@ -70,14 +79,59 @@ voteForm.addEventListener("submit", (event) => {
     return;
   }
 
-  state.candidateId = selected.value;
-
   const candidate = candidates.find(
-    (item) => item.id === state.candidateId
+    (item) => item.id === selected.value
   );
 
-  voteStatus.textContent =
-    `${candidate.name}을 선택했습니다. (화면 확인용 · 서버 저장 전)`;
+  if (!candidate) {
+    voteStatus.textContent = "올바른 후보를 선택해주세요.";
+    return;
+  }
+
+  // 투표 저장 중 다른 입력으로 화면이 바뀌지 않게 잠금
+  const controls = [
+    ...originSearchForm.querySelectorAll("input, button"),
+    ...originForm.querySelectorAll("input, button"),
+    ...voteForm.querySelectorAll("input, button")
+  ];
+
+  const previousDisabled = controls.map(
+    (control) => control.disabled
+  );
+
+  controls.forEach((control) => {
+    control.disabled = true;
+  });
+
+  voteStatus.textContent = "투표를 저장하는 중입니다.";
+
+  try {
+    const result = await api(
+      `/api/rooms/${encodeURIComponent(code)}/vote`,
+      {
+        method: "PUT",
+        body: {
+          memberId,
+          candidateId: candidate.id
+        }
+      }
+    );
+
+    state.candidateId = result.candidateId;
+
+    voteStatus.textContent =
+      `${candidate.name}에 투표했습니다. ` +
+      `투표 참여: ${result.voteCount}/${result.memberCount}명`;
+  } catch (error) {
+    voteStatus.textContent = error.message;
+
+    // 저장 실패 시 마지막으로 저장에 성공한 선택 복원
+    renderCandidates();
+  } finally {
+    controls.forEach((control, index) => {
+      control.disabled = previousDisabled[index];
+    });
+  }
 });
 
 const originSearchForm =
@@ -291,7 +345,16 @@ async function loadSavedOrigin() {
     }
 
     state.originId = origin.id;
+    state.candidateId = result.candidateId;
     originQuery.value = origin.name;
+
+    const votedCandidate = candidates.find(
+      (item) => item.id === state.candidateId
+    );
+
+    voteStatus.textContent = votedCandidate
+      ? `내가 투표한 장소: ${votedCandidate.name}`
+      : "아직 투표하지 않았습니다.";
 
     originStatus.textContent =
       `저장된 출발지: ${origin.name} · ` +

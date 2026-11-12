@@ -38,6 +38,7 @@ router.put('/:code/origin', (req, res) => {
 
   // 같은 사람이 다시 저장하면 기존 출발지를 교체
   room.origins[memberId] = originId;
+  delete room.votes[memberId];
 
   res.json({
     originId,
@@ -66,8 +67,58 @@ router.get('/:code/origin', (req, res) => {
   }
 
   res.json({
-    originId: room.origins[memberId] || null,
-    savedCount: Object.keys(room.origins).length,
+  originId: room.origins[memberId] || null,
+  candidateId: room.votes[memberId] || null,
+  savedCount: Object.keys(room.origins).length,
+  memberCount: room.members.length
+});
+});
+
+// 장소 투표 저장
+router.put('/:code/vote', (req, res) => {
+  const room = store.getRoom(req.params.code);
+
+  if (!room) {
+    return res.status(404).json({
+      error: '존재하지 않는 방입니다.'
+    });
+  }
+
+  const { memberId, candidateId } = req.body || {};
+  const member = store.getMember(room, memberId);
+
+  if (!member) {
+    return res.status(403).json({
+      error: '이 방에 먼저 참여해주세요.'
+    });
+  }
+
+  if (!room.origins[memberId]) {
+    return res.status(400).json({
+      error: '출발지를 먼저 저장해주세요.'
+    });
+  }
+
+  if (room.stage === 'result') {
+    return res.status(409).json({
+      error: '투표가 마감되었습니다.'
+    });
+  }
+
+  const candidateIds = ['sample-a', 'sample-b', 'sample-c'];
+
+  if (!candidateIds.includes(candidateId)) {
+    return res.status(400).json({
+      error: '올바른 후보를 선택해주세요.'
+    });
+  }
+
+  // 같은 사람이 다시 투표하면 기존 표를 교체
+  room.votes[memberId] = candidateId;
+
+  res.json({
+    candidateId,
+    voteCount: Object.keys(room.votes).length,
     memberCount: room.members.length
   });
 });
