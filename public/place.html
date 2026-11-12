@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>장소 정하기</title>
+  <link rel="stylesheet" href="./css/place.css">
+  <script type="module" src="./js/place.js"></script>
+</head>
+<body>
+  <header>
+    <h1>장소 정하기</h1>
+  </header>
+
+  <main>
+    <!-- 1단계: 출발지 입력 -->
+    <section id="origin-section">
+      <h2>출발지를 선택해주세요</h2>
+
+      <form id="origin-form">
+        <label for="origin">출발역</label>
+        <select id="origin" name="origin" required>
+          <option value="">출발역 선택</option>
+          <option value="gangnam">강남역</option>
+          <option value="hongik">홍대입구역</option>
+          <option value="wangsimni">왕십리역</option>
+        </select>
+
+        <button type="submit">출발지 저장</button>
+      </form>
+
+      <p id="origin-status" role="status"></p>
+    </section>
+
+    <!-- 2단계: 후보 투표 -->
+    <section id="vote-section" hidden>
+      <h2>만나고 싶은 장소에 투표해주세요</h2>
+      <p>투표한 사람의 이름은 공개되지 않습니다.</p>
+
+      <form id="vote-form">
+        <div id="candidate-list"></div>
+        <button type="submit">투표하기</button>
+      </form>
+
+      <p id="vote-status" role="status"></p>
+    </section>
+
+    <!-- 3단계: 최종 결과 -->
+    <section id="result-section" hidden>
+      <h2>최종 장소</h2>
+      <p id="final-place"></p>
+      <p id="final-votes"></p>
+    </section>
+  </main>
+</body>
+</html>
