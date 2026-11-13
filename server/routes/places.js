@@ -2,29 +2,11 @@ const express = require('express');
 const router = express.Router();
 const store = require('../store');
 
-// 현재 화면에서 사용하는 예시 출발지
-const originIds = ['kw', 'gangnam', 'hongik', 'wangsimni'];
+const { origins, meetingPlaces } = require('../data/places');
+const { recommendPlaces } = require('../placeRecommendation');
 
-const placeCandidates = [
-  {
-    id: 'sample-a',
-    name: '예시 장소 A',
-    features: '식사 중심 모임을 위한 예시 후보'
-  },
-  {
-    id: 'sample-b',
-    name: '예시 장소 B',
-    features: '카페 중심 모임을 위한 예시 후보'
-  },
-  {
-    id: 'sample-c',
-    name: '예시 장소 C',
-    features: '산책 중심 모임을 위한 예시 후보'
-  }
-];
-
-// 출발지 저장
-router.put('/:code/origin', (req, res) => {
+// 장소 API 공통 검사
+function requireMember(req, res, next) {
   const room = store.getRoom(req.params.code);
 
   if (!room) {
@@ -33,7 +15,10 @@ router.put('/:code/origin', (req, res) => {
     });
   }
 
-  const { memberId, originId } = req.body || {};
+  const memberId = req.method === 'GET'
+    ? req.query.memberId
+    : req.body?.memberId;
+
   const member = store.getMember(room, memberId);
 
   if (!member) {
@@ -42,130 +27,38 @@ router.put('/:code/origin', (req, res) => {
     });
   }
 
-  if (room.stage !== 'origin') {
+  if (!Number.isSafeInteger(room.totalMembers) ||
+      room.totalMembers < 1) {
     return res.status(409).json({
-      error: '출발지 입력이 마감되었습니다.'
+      error: '총인원이 설정된 새 방을 만들어주세요.'
     });
   }
 
-  if (!originIds.includes(originId)) {
-    return res.status(400).json({
-      error: '올바른 출발지를 선택해주세요.'
-    });
-  }
+  // C 담당 데이터는 장소 API에서 초기화
+  room.placeStage ??= 'origin';
+  room.placeCandidates ??= [];
 
-  // 같은 사람이 다시 저장하면 기존 출발지를 교체
-  room.origins[memberId] = originId;
-  delete room.votes[memberId];
+  req.room = room;
+  req.member = member;
+  next();
+}
 
-  res.json({
-    originId,
-    savedCount: Object.keys(room.origins).length,
-    memberCount: room.members.length
-  });
-});
+function getSavedCount(room) {
+  return room.members.filter((member) =>
+    origins.some(
+      (origin) => origin.id === room.origins[member.memberId]
+    )
+  ).length;
+}
 
-// 내 출발지 조회
-router.get('/:code/origin', (req, res) => {
-  const room = store.getRoom(req.params.code);
-
-  if (!room) {
-    return res.status(404).json({
-      error: '존재하지 않는 방입니다.'
-    });
-  }
-
-  const memberId = req.query.memberId;
-  const member = store.getMember(room, memberId);
-
-  if (!member) {
-    return res.status(403).json({
-      error: '이 방에 먼저 참여해주세요.'
-    });
-  }
-
-  res.json({
-  originId: room.origins[memberId] || null,
-  candidateId: room.votes[memberId] || null,
-  savedCount: Object.keys(room.origins).length,
-  memberCount: room.members.length
-});
-});
-
-// 장소 투표 저장
-router.put('/:code/vote', (req, res) => {
-  const room = store.getRoom(req.params.code);
-
-  if (!room) {
-    return res.status(404).json({
-      error: '존재하지 않는 방입니다.'
-    });
-  }
-
-  const { memberId, candidateId } = req.body || {};
-  const member = store.getMember(room, memberId);
-
-  if (!member) {
-    return res.status(403).json({
-      error: '이 방에 먼저 참여해주세요.'
-    });
-  }
-
-  if (!room.origins[memberId]) {
-    return res.status(400).json({
-      error: '출발지를 먼저 저장해주세요.'
-    });
-  }
-
-  if (room.stage === 'result') {
-    return res.status(409).json({
-      error: '투표가 마감되었습니다.'
-    });
-  }
-
-  const candidateIds = placeCandidates.map((candidate) => candidate.id);
-
-  if (!candidateIds.includes(candidateId)) {
-    return res.status(400).json({
-      error: '올바른 후보를 선택해주세요.'
-    });
-  }
-
-  // 같은 사람이 다시 투표하면 기존 표를 교체
-  room.votes[memberId] = candidateId;
-
-  res.json({
-    candidateId,
-    voteCount: Object.keys(room.votes).length,
-    memberCount: room.members.length
-  });
-});
-
-// 후보별 투표 현황 조회
-router.get('/:code/votes', (req, res) => {
-  const room = store.getRoom(req.params.code);
-
-  if (!room) {
-    return res.status(404).json({
-      error: '존재하지 않는 방입니다.'
-    });
-  }
-
-  const member = store.getMember(room, req.query.memberId);
-
-  if (!member) {
-    return res.status(403).json({
-      error: '이 방에 먼저 참여해주세요.'
-    });
-  }
-
+// 현재 방의 장소 상태를 화면에 전달
+function getPlaceState(room, memberId) {
   const counts = {};
 
-  placeCandidates.forEach((candidate) => {
+  room.placeCandidates.forEach((candidate) => {
     counts[candidate.id] = 0;
   });
 
-  // 현재 방 참여자의 유효한 표만 집계
   room.members.forEach((member) => {
     const candidateId = room.votes[member.memberId];
 
@@ -179,70 +72,128 @@ router.get('/:code/votes', (req, res) => {
     0
   );
 
-  const maxVotes = Math.max(...Object.values(counts));
+  const maxVotes = Math.max(0, ...Object.values(counts));
 
-  const winnerIds = maxVotes > 0
+  const winnerIds = room.placeStage === 'result' && maxVotes > 0
     ? Object.keys(counts).filter((id) => counts[id] === maxVotes)
     : [];
 
-  res.json({
+  return {
+    stage: room.placeStage,
+    totalMembers: room.totalMembers,
+    memberCount: room.members.length,
+    savedCount: getSavedCount(room),
+    originId: room.origins[memberId] || null,
+    candidateId: room.votes[memberId] || null,
+    originOptions: origins.map(({ id, name }) => ({ id, name })),
+    candidates: room.placeCandidates,
     counts,
     voteCount,
-    memberCount: room.members.length,
-    stage: room.stage,
-    isHost: member.memberId === room.hostMemberId,
-    winnerIds: room.stage === 'result' ? winnerIds : []
+    winnerIds
+  };
+}
+
+// 출발지 저장
+router.put('/:code/origin', requireMember, (req, res) => {
+  const room = req.room;
+  const memberId = req.member.memberId;
+  const { originId } = req.body || {};
+
+  if (room.placeStage !== 'origin') {
+    return res.status(409).json({
+      error: '추천이 완료되어 출발지를 변경할 수 없습니다.'
+    });
+  }
+
+  if (!origins.some((origin) => origin.id === originId)) {
+    return res.status(400).json({
+      error: '올바른 출발지를 선택해주세요.'
+    });
+  }
+
+  room.origins[memberId] = originId;
+
+  const everyoneReady =
+    room.members.length === room.totalMembers &&
+    getSavedCount(room) === room.totalMembers;
+
+  if (everyoneReady) {
+    const selectedOrigins = room.members.map((member) =>
+      origins.find(
+        (origin) => origin.id === room.origins[member.memberId]
+      )
+    );
+
+    // 같은 출발지를 선택한 사람도 인원수만큼 계산
+    room.placeCandidates = recommendPlaces(
+      selectedOrigins,
+      meetingPlaces
+    );
+
+    room.votes = {};
+    room.placeStage = 'vote';
+  }
+
+  res.json(getPlaceState(room, memberId));
+});
+
+// 출발지 및 진행 상태 조회
+router.get('/:code/origin', requireMember, (req, res) => {
+  res.json(getPlaceState(req.room, req.member.memberId));
+});
+
+// 후보 목록 조회
+router.get('/:code/candidates', requireMember, (req, res) => {
+  res.json({
+    stage: req.room.placeStage,
+    candidates: req.room.placeCandidates
   });
 });
 
-  // 방장이 장소 투표 마감
-router.post('/:code/vote/close', (req, res) => {
-  const room = store.getRoom(req.params.code);
+// 투표 저장·변경
+router.put('/:code/vote', requireMember, (req, res) => {
+  const room = req.room;
+  const memberId = req.member.memberId;
+  const { candidateId } = req.body || {};
 
-  if (!room) {
-    return res.status(404).json({
-      error: '존재하지 않는 방입니다.'
+  if (room.placeStage !== 'vote') {
+    return res.status(409).json({
+      error: room.placeStage === 'result'
+        ? '투표가 마감되었습니다.'
+        : '모든 참여자의 출발지 입력을 기다리고 있습니다.'
     });
   }
 
-  const { memberId } = req.body || {};
-  const member = store.getMember(room, memberId);
-
-  if (!member || memberId !== room.hostMemberId) {
-    return res.status(403).json({
-      error: '방장만 투표를 마감할 수 있습니다.'
+  if (!room.placeCandidates.some(
+    (candidate) => candidate.id === candidateId
+  )) {
+    return res.status(400).json({
+      error: '올바른 후보를 선택해주세요.'
     });
   }
 
-  // 이미 마감된 경우에도 같은 상태 반환
-  room.stage = 'result';
+  room.votes[memberId] = candidateId;
 
-  res.json({
-    stage: room.stage
-  });
+  const everyoneVoted =
+    room.members.length === room.totalMembers &&
+    room.members.every((member) =>
+      room.placeCandidates.some(
+        (candidate) =>
+          candidate.id === room.votes[member.memberId]
+      )
+    );
+
+  // 마지막 사람의 투표를 저장한 직후 자동 마감
+  if (everyoneVoted) {
+    room.placeStage = 'result';
+  }
+
+  res.json(getPlaceState(room, memberId));
 });
 
-// 장소 후보 목록 조회
-router.get('/:code/candidates', (req, res) => {
-  const room = store.getRoom(req.params.code);
-
-  if (!room) {
-    return res.status(404).json({
-      error: '존재하지 않는 방입니다.'
-    });
-  }
-
-  const member = store.getMember(room, req.query.memberId);
-
-  if (!member) {
-    return res.status(403).json({
-      error: '이 방에 먼저 참여해주세요.'
-    });
-  }
-
-  res.json({
-    candidates: placeCandidates
-  });
+// 투표 현황 조회: 다른 사람의 개별 투표는 반환하지 않음
+router.get('/:code/votes', requireMember, (req, res) => {
+  res.json(getPlaceState(req.room, req.member.memberId));
 });
 
 module.exports = router;
