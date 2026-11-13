@@ -37,6 +37,7 @@ router.post('/:code/members', (req, res) => {
   const room = store.getRoom(req.params.code);
   if (!room) return res.status(404).json({ error: '존재하지 않는 방 코드입니다.' });
 
+  // 이미 이 방의 참여자면 인원이 꽉 차 있어도 그대로 입장 (재접속 허용)
   const existing = req.body.memberId ? store.getMember(room, req.body.memberId) : null;
   if (existing) {
     return res.json({ memberId: existing.memberId, name: existing.name, code: room.code });
@@ -45,6 +46,11 @@ router.post('/:code/members', (req, res) => {
   const name = String(req.body.name || '').trim();
   if (!name) return res.status(400).json({ error: '이름을 입력해주세요.' });
   if (name.length > 10) return res.status(400).json({ error: '이름은 10자 이내로 입력해주세요.' });
+
+  // 총 인원수에 도달했으면 새 참여 차단
+  if (room.members.length >= room.totalMembers) {
+    return res.status(409).json({ error: '정원이 가득 찬 방입니다.' });
+  }
 
   const member = store.addMember(room, name);
   res.status(201).json({ memberId: member.memberId, name: member.name, code: room.code });
