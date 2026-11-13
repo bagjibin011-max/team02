@@ -60,34 +60,35 @@ document.getElementById('cancelBtn').addEventListener('click', () => dialog.clos
 // 방 만들기 확정
 document.getElementById('confirmBtn').addEventListener('click', async () => {
   dialogError.textContent = '';
-
   const name = getName();
   if (!name) return dialog.close();
 
-  const roomName =
-    document.getElementById('roomNameInput').value.trim();
+  const roomName = document.getElementById('roomNameInput').value.trim();
+  const totalMembers = Number(document.getElementById('totalInput').value);
 
   if (!roomName) {
     dialogError.textContent = '방 이름을 입력해주세요.';
     return;
   }
-
-  const confirmBtn = document.getElementById('confirmBtn');
-  confirmBtn.disabled = true;
-
+  if (!Number.isInteger(totalMembers) || totalMembers < 1) {
+    dialogError.textContent = '총 인원수를 1 이상의 숫자로 입력해주세요.';
+    return;
+  }
   try {
-    const data = await api('/api/rooms', {
+    const { code } = await api('/api/rooms', {
       method: 'POST',
-      body: { roomName, name },
+      body: { roomName, totalMembers },
     });
-
-    // 생성자는 서버에서 이미 참여자로 등록됨
-    saveMember(data.code, data.memberId, data.name);
-
-    window.location.href = `/room.html?code=${data.code}`;
+    await joinAndGo(code, name);
   } catch (e) {
     dialogError.textContent = e.message;
-  } finally {
-    confirmBtn.disabled = false;
   }
+});
+
+// 방 만들기 창에서 엔터를 누르면 '방 만들기' 실행
+dialog.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.isComposing) return; // 한글 입력 중 엔터는 무시
+  if (e.target.tagName !== 'INPUT') return;
+  e.preventDefault();
+  document.getElementById('confirmBtn').click();
 });

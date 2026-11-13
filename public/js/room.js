@@ -26,7 +26,7 @@
     document.title = `${room.roomName} · 약속 조율`;
     document.getElementById('roomName').textContent = room.roomName;
     document.getElementById('count').textContent =
-      `👥 ${room.memberCount}명`;
+      `👥 ${room.memberCount}/${room.totalMembers}명`;
 
     const list = document.getElementById('memberList');
     list.innerHTML = '';
